@@ -9,6 +9,7 @@ import {
   loadUserFromStorage,
   saveUserToStorage,
   getInitialSeedData,
+  resetSystemStorage,
 } from '../utils/storage';
 import {
   getTodayKey,
@@ -51,6 +52,7 @@ interface HabitContextType {
   
   // Settings & Storage
   resetToDefaults: () => void;
+  resetFullSystem: () => void;
   importData: (jsonStr: string) => boolean;
   exportData: () => string;
   loadTemplate: (templates: Partial<Habit>[]) => void;
@@ -372,6 +374,17 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(true);
   }, []);
 
+  // Reset full system: wipe all habits, all logs, reset user to Level 1 (0 XP)
+  const resetFullSystem = useCallback(() => {
+    const resetResult = resetSystemStorage(true);
+    setHabits(resetResult.habits);
+    setLogs(resetResult.logs);
+    setUser(resetResult.user);
+    setSelectedDate(getTodayKey());
+    setActiveTab('today');
+    soundFx.playTap(true);
+  }, []);
+
   // Export JSON
   const exportData = useCallback((): string => {
     const data = {
@@ -480,6 +493,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         incrementHabitValue,
         updateHabitNotes,
         resetToDefaults,
+        resetFullSystem,
         importData,
         exportData,
         loadTemplate,

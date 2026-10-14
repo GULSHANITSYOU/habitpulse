@@ -150,38 +150,44 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           <div className="space-y-3 pt-2">
-            {sortedByRate.map(({ habit, stats }) => (
-              <div key={habit.id} className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white">
-                      <HabitIcon name={habit.icon} size={15} />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-black dark:text-white">{habit.title}</span>
-                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 ml-2 capitalize">({habit.category})</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs font-semibold">
-                    {stats.currentStreak > 0 && (
-                      <span className="flex items-center gap-1 text-black dark:text-white font-bold">
-                        <Flame className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
-                        {stats.currentStreak}d
-                      </span>
-                    )}
-                    <span className="text-black dark:text-white font-black">{stats.completionRate30d}%</span>
-                  </div>
-                </div>
-
-                <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-black dark:bg-white transition-all duration-300"
-                    style={{ width: `${stats.completionRate30d}%` }}
-                  />
-                </div>
+            {sortedByRate.length === 0 ? (
+              <div className="py-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                No habits active. Start a new habit to track your consistency rankings.
               </div>
-            ))}
+            ) : (
+              sortedByRate.map(({ habit, stats }) => (
+                <div key={habit.id} className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white">
+                        <HabitIcon name={habit.icon} size={15} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-black dark:text-white">{habit.title}</span>
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 ml-2 capitalize">({habit.category})</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs font-semibold">
+                      {stats.currentStreak > 0 && (
+                        <span className="flex items-center gap-1 text-black dark:text-white font-bold">
+                          <Flame className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
+                          {stats.currentStreak}d
+                        </span>
+                      )}
+                      <span className="text-black dark:text-white font-black">{stats.completionRate30d}%</span>
+                    </div>
+                  </div>
+
+                  <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-black dark:bg-white transition-all duration-300"
+                      style={{ width: `${stats.completionRate30d}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -193,23 +199,29 @@ export const AnalyticsView: React.FC = () => {
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Distribution across routine dimensions</p>
 
             <div className="space-y-3 pt-2">
-              {Object.entries(categoryCounts).map(([cat, count]) => {
-                const percent = Math.round((count / activeHabits.length) * 100);
-                return (
-                  <div key={cat} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-medium">
-                      <span className="capitalize text-zinc-700 dark:text-zinc-200">{cat}</span>
-                      <span className="text-zinc-500 dark:text-zinc-400">{count} habits ({percent}%)</span>
+              {Object.keys(categoryCounts).length === 0 ? (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 py-4 text-center">
+                  No active categories yet.
+                </p>
+              ) : (
+                Object.entries(categoryCounts).map(([cat, count]) => {
+                  const percent = Math.round((count / activeHabits.length) * 100);
+                  return (
+                    <div key={cat} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs font-medium">
+                        <span className="capitalize text-zinc-700 dark:text-zinc-200">{cat}</span>
+                        <span className="text-zinc-500 dark:text-zinc-400">{count} habits ({percent}%)</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-black dark:bg-white"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-black dark:bg-white"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 

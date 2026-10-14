@@ -189,6 +189,18 @@ export const WeeklyMatrix: React.FC = () => {
                 </tr>
               );
             })}
+            {activeHabits.length === 0 && (
+              <tr>
+                <td colSpan={9} className="py-12 text-center">
+                  <div className="max-w-xs mx-auto space-y-2">
+                    <p className="text-sm font-bold text-black dark:text-white">No habits tracked yet</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Create habits or pick blueprints to view your 7-day consistency grid.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

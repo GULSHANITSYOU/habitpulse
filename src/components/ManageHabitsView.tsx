@@ -9,11 +9,13 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import type { Habit } from '../types/habit';
 import { HabitIcon } from './HabitIcon';
 import { HabitModal } from './HabitModal';
+import { ResetSystemModal } from './ResetSystemModal';
 import { HABIT_TEMPLATES } from '../utils/storage';
 
 export const ManageHabitsView: React.FC = () => {
@@ -23,12 +25,14 @@ export const ManageHabitsView: React.FC = () => {
     toggleArchiveHabit,
     loadTemplate,
     getHabitStats,
+    resetFullSystem,
   } = useHabits();
 
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [habitToEdit, setHabitToEdit] = useState<Habit | undefined>(undefined);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [templateLoadedMsg, setTemplateLoadedMsg] = useState<string | null>(null);
 
   const displayedHabits = habits
@@ -58,16 +62,27 @@ export const ManageHabitsView: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setHabitToEdit(undefined);
-            setIsAddModalOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition active:scale-95"
-        >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Create New Habit</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setIsResetModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white border border-zinc-200 dark:border-zinc-800 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition active:scale-95"
+            title="Wipe habits & restart system"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span className="hidden sm:inline">Reset System</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setHabitToEdit(undefined);
+              setIsAddModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition active:scale-95"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Create New Habit</span>
+          </button>
+        </div>
       </div>
 
       {/* Routine Templates Shelf */}
@@ -246,6 +261,17 @@ export const ManageHabitsView: React.FC = () => {
             setIsAddModalOpen(false);
             setHabitToEdit(undefined);
           }}
+        />
+      )}
+
+      {isResetModalOpen && (
+        <ResetSystemModal
+          isOpen={isResetModalOpen}
+          onConfirm={() => {
+            resetFullSystem();
+            setIsResetModalOpen(false);
+          }}
+          onCancel={() => setIsResetModalOpen(false)}
         />
       )}
     </div>

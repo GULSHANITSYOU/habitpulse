@@ -13,10 +13,12 @@ import {
   ListTodo,
   Flame,
   Award,
+  RotateCcw,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { HabitModal } from './HabitModal';
 import { ExportImportModal } from './ExportImportModal';
+import { ResetSystemModal } from './ResetSystemModal';
 
 export const Header: React.FC = () => {
   const {
@@ -27,10 +29,12 @@ export const Header: React.FC = () => {
     toggleTheme,
     habits,
     getHabitStats,
+    resetFullSystem,
   } = useHabits();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const activeHabits = habits.filter((h) => !h.archived);
   const maxStreak = activeHabits.reduce((max, h) => {
@@ -132,6 +136,15 @@ export const Header: React.FC = () => {
                 <Download className="w-4 h-4" />
               </button>
 
+              {/* Reset Full System Button */}
+              <button
+                onClick={() => setIsResetModalOpen(true)}
+                title="Reset Full System & Restart"
+                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
               {/* + New Habit Button */}
               <button
                 onClick={() => setIsAddModalOpen(true)}
@@ -170,6 +183,16 @@ export const Header: React.FC = () => {
       {/* Modals */}
       {isAddModalOpen && <HabitModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
       {isBackupModalOpen && <ExportImportModal isOpen={isBackupModalOpen} onClose={() => setIsBackupModalOpen(false)} />}
+      {isResetModalOpen && (
+        <ResetSystemModal
+          isOpen={isResetModalOpen}
+          onConfirm={() => {
+            resetFullSystem();
+            setIsResetModalOpen(false);
+          }}
+          onCancel={() => setIsResetModalOpen(false)}
+        />
+      )}
     </>
   );
 };

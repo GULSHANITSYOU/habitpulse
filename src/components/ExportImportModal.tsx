@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Download, Upload, RefreshCw, Copy, Check, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { X, Download, Upload, RefreshCw, Copy, Check, AlertTriangle, ShieldCheck, RotateCcw } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
+import { ResetSystemModal } from './ResetSystemModal';
 
 interface ExportImportModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
     exportData,
     importData,
     resetToDefaults,
+    resetFullSystem,
     user,
     resetDeleteConfirmPreference,
   } = useHabits();
@@ -20,6 +22,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
   const [importJson, setImportJson] = useState('');
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showFullResetModal, setShowFullResetModal] = useState(false);
   const [resetPromptPrefMsg, setResetPromptPrefMsg] = useState(false);
 
   if (!isOpen) return null;
@@ -236,8 +239,45 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
               )}
             </div>
           </div>
+
+          {/* Danger Zone: Full System Reset & Restart */}
+          <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-black text-white dark:bg-white dark:text-black">
+                    Danger Zone
+                  </span>
+                  <h4 className="text-xs font-bold text-black dark:text-white">Restart System From Scratch</h4>
+                </div>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
+                  Delete all habits, clear history & restart at Level 1 (0 XP)
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowFullResetModal(true)}
+                className="px-3.5 py-2 rounded-xl bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-xs self-start sm:self-center shrink-0 active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Full System</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {showFullResetModal && (
+        <ResetSystemModal
+          isOpen={showFullResetModal}
+          onConfirm={() => {
+            resetFullSystem();
+            setShowFullResetModal(false);
+            onClose();
+          }}
+          onCancel={() => setShowFullResetModal(false)}
+        />
+      )}
     </div>
   );
 };

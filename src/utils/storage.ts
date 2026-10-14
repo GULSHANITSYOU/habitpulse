@@ -1,10 +1,11 @@
 import type { Habit, HabitLog, UserProfile } from '../types/habit';
 import { formatDateKey } from './dateUtils';
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   HABITS: 'habitpulse_habits_v1',
   LOGS: 'habitpulse_logs_v1',
   USER: 'habitpulse_user_v1',
+  INITIALIZED: 'habitpulse_initialized_v1',
 };
 
 // Initial default user profile
@@ -12,6 +13,16 @@ export const defaultUserProfile: UserProfile = {
   name: 'Alex',
   xp: 340,
   level: 3,
+  soundEnabled: true,
+  darkMode: false,
+  skipDeleteConfirm: false,
+};
+
+// Reset fresh user profile (restart from Level 1, 0 XP)
+export const freshRestartUserProfile: UserProfile = {
+  name: 'Alex',
+  xp: 0,
+  level: 1,
   soundEnabled: true,
   darkMode: false,
   skipDeleteConfirm: false,
@@ -165,18 +176,48 @@ export function getInitialSeedData(): { habits: Habit[]; logs: HabitLog[]; user:
 // LocalStorage helpers
 export function loadHabitsFromStorage(): Habit[] {
   try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
     const data = localStorage.getItem(STORAGE_KEYS.HABITS);
-    if (!data) {
+    if (!data && !isInitialized) {
       const initial = getInitialSeedData();
       saveHabitsToStorage(initial.habits);
       saveLogsToStorage(initial.logs);
       saveUserToStorage(initial.user);
+      localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
       return initial.habits;
     }
-    return JSON.parse(data);
+    return data ? JSON.parse(data) : [];
   } catch (err) {
     console.error('Failed to load habits from storage', err);
     return [];
+  }
+}
+
+// Reset full system in localStorage: delete all habits, logs and restart at Level 1 (0 XP)
+export function resetSystemStorage(preserveTheme = true): { habits: Habit[]; logs: HabitLog[]; user: UserProfile } {
+  try {
+    const currentUser = loadUserFromStorage();
+    const resetUser: UserProfile = {
+      ...freshRestartUserProfile,
+      soundEnabled: currentUser.soundEnabled,
+      darkMode: preserveTheme ? currentUser.darkMode : false,
+    };
+    saveHabitsToStorage([]);
+    saveLogsToStorage([]);
+    saveUserToStorage(resetUser);
+    localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+    return {
+      habits: [],
+      logs: [],
+      user: resetUser,
+    };
+  } catch (err) {
+    console.error('Failed to reset storage', err);
+    return {
+      habits: [],
+      logs: [],
+      user: freshRestartUserProfile,
+    };
   }
 }
 
