@@ -82,52 +82,52 @@ export const AnalyticsView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card-neo card-active p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">Consistency (30d)</span>
-            <TrendingUp className="w-4 h-4 text-white" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Consistency (30d)</span>
+            <TrendingUp className="w-4 h-4 text-black dark:text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">{overallRate}%</span>
-            <span className="text-xs text-zinc-400">average</span>
+            <span className="text-3xl font-black text-black dark:text-white tracking-tight">{overallRate}%</span>
+            <span className="text-xs text-zinc-500">average</span>
           </div>
-          <div className="w-full h-1.5 bg-zinc-800 rounded-full mt-3 overflow-hidden">
-            <div className="h-full bg-white rounded-full shadow-sm shadow-white/50" style={{ width: `${overallRate}%` }} />
+          <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mt-3 overflow-hidden">
+            <div className="h-full bg-black dark:bg-white rounded-full" style={{ width: `${overallRate}%` }} />
           </div>
         </div>
 
         <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Total Check-ins</span>
-            <CheckCircle2 className="w-4 h-4 text-white" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Total Check-ins</span>
+            <CheckCircle2 className="w-4 h-4 text-black dark:text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">{totalCompletionsAllTime}</span>
-            <span className="text-xs text-zinc-400">rituals</span>
+            <span className="text-3xl font-black text-black dark:text-white tracking-tight">{totalCompletionsAllTime}</span>
+            <span className="text-xs text-zinc-500">rituals</span>
           </div>
           <p className="text-xs text-zinc-500 mt-2 font-medium">Lifelong habit repetitions</p>
         </div>
 
         <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Player Level</span>
-            <Award className="w-4 h-4 text-white" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Player Level</span>
+            <Award className="w-4 h-4 text-black dark:text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">Lvl {user.level}</span>
-            <span className="text-xs text-white font-semibold">({user.xp} XP)</span>
+            <span className="text-3xl font-black text-black dark:text-white tracking-tight">Lvl {user.level}</span>
+            <span className="text-xs text-zinc-600 dark:text-zinc-300 font-semibold">({user.xp} XP)</span>
           </div>
           <p className="text-xs text-zinc-500 mt-2 font-medium">{150 - (user.xp % 150)} XP to next level</p>
         </div>
 
         <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Top Streak</span>
-            <Flame className="w-4 h-4 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Top Streak</span>
+            <Flame className="w-4 h-4 fill-black text-black dark:fill-white dark:text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">
+            <span className="text-3xl font-black text-black dark:text-white tracking-tight">
               {sortedByStreak[0]?.stats.currentStreak || 0}d
             </span>
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-zinc-500">
               Best: {sortedByStreak[0]?.stats.longestStreak || 0}d
             </span>
           </div>
@@ -140,43 +140,43 @@ export const AnalyticsView: React.FC = () => {
       {/* Grid: Consistency Ranking & Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Habit Consistency Ranking */}
-        <div className="lg:col-span-8 p-6 rounded-3xl card-neo space-y-4">
+        <div className="lg:col-span-8 p-6 rounded-2xl card-neo space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-base text-white tracking-tight">Consistency Ranking</h3>
-              <p className="text-xs text-zinc-400">Habits ranked by 30-day completion reliability</p>
+              <h3 className="font-bold text-base text-black dark:text-white tracking-tight">Consistency Ranking</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Habits ranked by 30-day completion reliability</p>
             </div>
-            <Clock className="w-4 h-4 text-zinc-500" />
+            <Clock className="w-4 h-4 text-zinc-400" />
           </div>
 
           <div className="space-y-3 pt-2">
             {sortedByRate.map(({ habit, stats }) => (
-              <div key={habit.id} className="p-4 rounded-2xl bg-zinc-900 border border-white/5">
+              <div key={habit.id} className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/10 border border-white/15 text-white">
-                      <HabitIcon name={habit.icon} size={15} color="#ffffff" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white">
+                      <HabitIcon name={habit.icon} size={15} />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-white">{habit.title}</span>
-                      <span className="text-[11px] text-zinc-400 ml-2 capitalize">({habit.category})</span>
+                      <span className="text-xs font-bold text-black dark:text-white">{habit.title}</span>
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 ml-2 capitalize">({habit.category})</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 text-xs font-semibold">
                     {stats.currentStreak > 0 && (
-                      <span className="flex items-center gap-1 text-white">
-                        <Flame className="w-3.5 h-3.5 fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]" />
+                      <span className="flex items-center gap-1 text-black dark:text-white font-bold">
+                        <Flame className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
                         {stats.currentStreak}d
                       </span>
                     )}
-                    <span className="text-white font-black">{stats.completionRate30d}%</span>
+                    <span className="text-black dark:text-white font-black">{stats.completionRate30d}%</span>
                   </div>
                 </div>
 
-                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-white transition-all duration-500 shadow-sm shadow-white/40"
+                    className="h-full rounded-full bg-black dark:bg-white transition-all duration-300"
                     style={{ width: `${stats.completionRate30d}%` }}
                   />
                 </div>
@@ -188,9 +188,9 @@ export const AnalyticsView: React.FC = () => {
         {/* Category Distribution & Gamification Badges */}
         <div className="lg:col-span-4 space-y-6">
           {/* Categories */}
-          <div className="p-6 rounded-3xl card-neo space-y-4">
-            <h3 className="font-bold text-base text-white tracking-tight">Life Dimensions</h3>
-            <p className="text-xs text-zinc-400">Distribution across routine dimensions</p>
+          <div className="p-6 rounded-2xl card-neo space-y-4">
+            <h3 className="font-bold text-base text-black dark:text-white tracking-tight">Life Dimensions</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Distribution across routine dimensions</p>
 
             <div className="space-y-3 pt-2">
               {Object.entries(categoryCounts).map(([cat, count]) => {
@@ -198,12 +198,12 @@ export const AnalyticsView: React.FC = () => {
                 return (
                   <div key={cat} className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-medium">
-                      <span className="capitalize text-zinc-200">{cat}</span>
-                      <span className="text-zinc-400">{count} habits ({percent}%)</span>
+                      <span className="capitalize text-zinc-700 dark:text-zinc-200">{cat}</span>
+                      <span className="text-zinc-500 dark:text-zinc-400">{count} habits ({percent}%)</span>
                     </div>
-                    <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-white shadow-xs shadow-white/40"
+                        className="h-full rounded-full bg-black dark:bg-white"
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -214,8 +214,8 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           {/* Badges */}
-          <div className="p-6 rounded-3xl card-neo space-y-4">
-            <h3 className="font-bold text-base text-white tracking-tight">Milestones</h3>
+          <div className="p-6 rounded-2xl card-neo space-y-4">
+            <h3 className="font-bold text-base text-black dark:text-white tracking-tight">Milestones</h3>
 
             <div className="grid grid-cols-2 gap-3 pt-1">
               {achievements.map((ach) => {
@@ -223,21 +223,21 @@ export const AnalyticsView: React.FC = () => {
                 return (
                   <div
                     key={ach.id}
-                    className={`p-3.5 rounded-2xl border text-center transition ${
+                    className={`p-3.5 rounded-xl border text-center transition ${
                       ach.unlocked
-                        ? 'bg-white/10 border-white/20 text-white shadow-sm'
-                        : 'bg-zinc-900/40 border-white/5 text-zinc-600 opacity-50'
+                        ? 'bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-black dark:text-white shadow-xs'
+                        : 'bg-zinc-100/40 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800 text-zinc-400 opacity-50'
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 mx-auto rounded-xl flex items-center justify-center mb-2 ${
-                        ach.unlocked ? 'bg-white text-zinc-950 font-bold' : 'bg-zinc-800 text-zinc-600'
+                      className={`w-8 h-8 mx-auto rounded-lg flex items-center justify-center mb-2 ${
+                        ach.unlocked ? 'bg-black text-white dark:bg-white dark:text-black font-bold' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div className="text-xs font-bold leading-tight truncate text-white">{ach.title}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{ach.desc}</div>
+                    <div className="text-xs font-bold leading-tight truncate text-black dark:text-white">{ach.title}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5 line-clamp-2">{ach.desc}</div>
                   </div>
                 );
               })}

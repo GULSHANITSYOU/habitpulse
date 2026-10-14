@@ -13,7 +13,7 @@ export const defaultUserProfile: UserProfile = {
   xp: 340,
   level: 3,
   soundEnabled: true,
-  darkMode: true,
+  darkMode: false,
   skipDeleteConfirm: false,
 };
 
@@ -211,7 +211,14 @@ export function loadUserFromStorage(): UserProfile {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.USER);
     if (!data) return defaultUserProfile;
-    return { ...defaultUserProfile, ...JSON.parse(data) };
+    const parsed = JSON.parse(data);
+    // Transition to bright theme
+    if (!parsed.themeBrightV2) {
+      const updated = { ...defaultUserProfile, ...parsed, darkMode: false, themeBrightV2: true };
+      saveUserToStorage(updated);
+      return updated;
+    }
+    return { ...defaultUserProfile, ...parsed };
   } catch (err) {
     console.error('Failed to load user from storage', err);
     return defaultUserProfile;

@@ -50,10 +50,10 @@ export const ManageHabitsView: React.FC = () => {
       <div className="card-neo rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-white" />
-            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Habit Catalog & Blueprints</h2>
+            <Layers className="w-4 h-4 text-black dark:text-white" />
+            <h2 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight">Habit Catalog & Blueprints</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Organize, customize, archive, or batch-import proven routine packs
           </p>
         </div>
@@ -63,7 +63,7 @@ export const ManageHabitsView: React.FC = () => {
             setHabitToEdit(undefined);
             setIsAddModalOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white text-zinc-950 hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-white/10 transition active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition active:scale-95"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Create New Habit</span>
@@ -74,12 +74,12 @@ export const ManageHabitsView: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-white" />
-            <h3 className="font-bold text-sm text-zinc-200">Pre-Built Routine Blueprint Packs</h3>
+            <Sparkles className="w-4 h-4 text-black dark:text-white" />
+            <h3 className="font-bold text-sm text-black dark:text-white">Pre-Built Routine Blueprint Packs</h3>
           </div>
           {templateLoadedMsg && (
-            <span className="text-xs font-semibold text-white flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+            <span className="text-xs font-semibold text-black dark:text-white flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" />
               {templateLoadedMsg}
             </span>
           )}
@@ -92,14 +92,14 @@ export const ManageHabitsView: React.FC = () => {
               className="p-5 rounded-2xl card-neo flex flex-col justify-between gap-4"
             >
               <div>
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
                   {pack.category}
                 </span>
-                <h4 className="font-bold text-base text-white mt-1">{pack.name}</h4>
-                <ul className="mt-3 space-y-1.5 text-xs text-zinc-300">
+                <h4 className="font-bold text-base text-black dark:text-white mt-1">{pack.name}</h4>
+                <ul className="mt-3 space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300">
                   {pack.habits.map((h, i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white" />
                       <span>{h.title}</span>
                     </li>
                   ))}
@@ -108,7 +108,7 @@ export const ManageHabitsView: React.FC = () => {
 
               <button
                 onClick={() => handleLoadTemplate(pack)}
-                className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-white hover:text-zinc-950 text-white border border-white/10 text-xs font-semibold transition-all duration-200"
+                className="w-full py-2 px-3 rounded-xl bg-zinc-100 hover:bg-black hover:text-white dark:bg-zinc-900 dark:hover:bg-white dark:hover:text-black text-black dark:text-white border border-zinc-200 dark:border-zinc-800 text-xs font-semibold transition-all duration-150"
               >
                 + Add Routine Pack
               </button>
@@ -121,13 +121,13 @@ export const ManageHabitsView: React.FC = () => {
       <div className="space-y-4">
         {/* Tabs & Search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 bg-zinc-900 p-1 rounded-xl border border-white/10">
+          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
             <button
               onClick={() => setActiveTab('active')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'active'
-                  ? 'bg-white text-zinc-950 font-bold shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-black text-white dark:bg-white dark:text-black font-bold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
             >
               Active ({habits.filter((h) => !h.archived).length})
@@ -136,8 +136,8 @@ export const ManageHabitsView: React.FC = () => {
               onClick={() => setActiveTab('archived')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'archived'
-                  ? 'bg-white text-zinc-950 font-bold shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-black text-white dark:bg-white dark:text-black font-bold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
             >
               Archived ({habits.filter((h) => h.archived).length})
@@ -145,47 +145,47 @@ export const ManageHabitsView: React.FC = () => {
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search habits..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white font-medium"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-black dark:text-white placeholder-zinc-400 focus:outline-none focus:border-black dark:focus:border-white font-medium"
             />
           </div>
         </div>
 
         {/* Habit Items Table / List */}
-        <div className="rounded-3xl card-neo overflow-hidden">
+        <div className="rounded-2xl card-neo overflow-hidden">
           {displayedHabits.length === 0 ? (
             <div className="p-12 text-center text-zinc-500 text-sm">
               No habits found matching your filter.
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {displayedHabits.map((habit) => {
                 const stats = getHabitStats(habit);
 
                 return (
                   <div
                     key={habit.id}
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-white/10 border border-white/15 text-white">
-                        <HabitIcon name={habit.icon} size={20} color="#ffffff" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white">
+                        <HabitIcon name={habit.icon} size={20} />
                       </div>
 
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm sm:text-base text-white">{habit.title}</h4>
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize bg-white/10 text-zinc-300 border border-white/15">
+                          <h4 className="font-bold text-sm sm:text-base text-black dark:text-white">{habit.title}</h4>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white border border-zinc-200 dark:border-zinc-800">
                             {habit.category}
                           </span>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1">
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                           <span className="capitalize">{habit.frequencyType.replace('_', ' ')}</span>
                           <span>•</span>
                           <span className="capitalize">{habit.timeOfDay}</span>
@@ -196,7 +196,7 @@ export const ManageHabitsView: React.FC = () => {
                               : 'Checkoff'}
                           </span>
                           <span>•</span>
-                          <span className="text-white font-semibold">{stats.completionRate30d}% consistency</span>
+                          <span className="text-black dark:text-white font-semibold">{stats.completionRate30d}% consistency</span>
                         </div>
                       </div>
                     </div>
@@ -208,7 +208,7 @@ export const ManageHabitsView: React.FC = () => {
                           setHabitToEdit(habit);
                           setIsAddModalOpen(true);
                         }}
-                        className="p-2 rounded-xl text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition"
+                        className="p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
                         title="Edit Habit"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -216,7 +216,7 @@ export const ManageHabitsView: React.FC = () => {
 
                       <button
                         onClick={() => toggleArchiveHabit(habit.id)}
-                        className="p-2 rounded-xl text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition"
+                        className="p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
                         title={habit.archived ? 'Restore Habit' : 'Archive Habit'}
                       >
                         {habit.archived ? <RefreshCw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
@@ -224,7 +224,7 @@ export const ManageHabitsView: React.FC = () => {
 
                       <button
                         onClick={() => requestDeleteHabit(habit.id, habit.title)}
-                        className="p-2 rounded-xl text-zinc-400 hover:text-rose-400 bg-zinc-900 hover:bg-rose-500/10 border border-white/10 transition"
+                        className="p-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition font-semibold"
                         title="Delete Habit"
                       >
                         <Trash2 className="w-4 h-4" />

@@ -53,29 +53,29 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
     : 1;
 
   const timeIcons: Record<string, React.ReactNode> = {
-    morning: <Sun className="w-3 h-3 text-zinc-400" />,
-    afternoon: <Sun className="w-3 h-3 text-zinc-400" />,
-    evening: <Moon className="w-3 h-3 text-zinc-400" />,
+    morning: <Sun className="w-3 h-3 text-black dark:text-white" />,
+    afternoon: <Sun className="w-3 h-3 text-black dark:text-white" />,
+    evening: <Moon className="w-3 h-3 text-black dark:text-white" />,
     anytime: <Clock className="w-3 h-3 text-zinc-400" />,
   };
 
   return (
     <>
       <div
-        className={`card-neo rounded-2xl p-5 relative transition-all duration-300 ${
+        className={`card-neo rounded-2xl p-5 relative transition-all duration-200 ${
           isCompleted ? 'card-active' : ''
         }`}
       >
         {/* Top Header: Category, Time, Streaks, Menu */}
         <div className="flex items-start justify-between gap-3 mb-3.5">
           <div className="flex flex-wrap items-center gap-2">
-            {/* Minimalist Category Badge */}
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize bg-white/10 text-zinc-200 border border-white/15">
+            {/* Category Badge */}
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white border border-zinc-200 dark:border-zinc-800">
               {habit.category}
             </span>
 
             {/* Time of Day */}
-            <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full border border-white/5">
+            <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-200 dark:border-zinc-800">
               {timeIcons[habit.timeOfDay]}
               <span className="capitalize">{habit.timeOfDay}</span>
             </span>
@@ -90,10 +90,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
             {/* Streak Flame Badge */}
             {stats.currentStreak > 0 && (
               <div
-                className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold shadow-sm"
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white text-xs font-bold shadow-sm"
                 title={`${stats.currentStreak} day streak (Best: ${stats.longestStreak}d)`}
               >
-                <Flame className="w-3.5 h-3.5 fill-white text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]" />
+                <Flame className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
                 <span>{stats.currentStreak}d</span>
               </div>
             )}
@@ -103,7 +103,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
               <button
                 onClick={() => setIsNoteModalOpen(true)}
                 title="View note for this date"
-                className="p-1 rounded-lg text-white hover:text-zinc-200 bg-white/10 border border-white/20 transition"
+                className="p-1 rounded-lg text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
               </button>
@@ -113,7 +113,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
             <div className="relative">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition"
+                className="p-1 rounded-lg text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -121,15 +121,15 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
               {isMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-20" onClick={() => setIsMenuOpen(false)} />
-                  <div className="absolute right-0 mt-1 w-44 rounded-xl bg-zinc-900 border border-white/15 shadow-2xl py-1 z-30 text-xs">
+                  <div className="absolute right-0 mt-1 w-44 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 shadow-xl py-1 z-30 text-xs">
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);
                         setIsNoteModalOpen(true);
                       }}
-                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-white" />
+                      <MessageSquare className="w-3.5 h-3.5" />
                       <span>{log?.notes ? 'Edit Note' : 'Add Note'}</span>
                     </button>
                     <button
@@ -137,9 +137,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                         setIsMenuOpen(false);
                         setIsEditModalOpen(true);
                       }}
-                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-white" />
+                      <Edit2 className="w-3.5 h-3.5" />
                       <span>Edit Habit</span>
                     </button>
                     <button
@@ -147,18 +147,18 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                         setIsMenuOpen(false);
                         toggleArchiveHabit(habit.id);
                       }}
-                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition"
                     >
-                      <Archive className="w-3.5 h-3.5 text-white" />
+                      <Archive className="w-3.5 h-3.5" />
                       <span>{habit.archived ? 'Restore' : 'Archive'}</span>
                     </button>
-                    <div className="border-t border-white/10 my-1" />
+                    <div className="border-t border-zinc-200 dark:border-zinc-800 my-1" />
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);
                         requestDeleteHabit(habit.id, habit.title);
                       }}
-                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-rose-400 hover:bg-rose-500/10 transition"
+                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition font-semibold"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete</span>
@@ -172,25 +172,24 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
 
         {/* Middle: Icon, Title, Description */}
         <div className="flex items-start gap-3.5">
-          {/* Minimal monochrome square icon with clean border */}
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 bg-white/10 border border-white/15 text-white shadow-sm transition-transform group-hover:scale-105">
-            <HabitIcon name={habit.icon} size={22} color="#ffffff" />
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white shadow-sm transition-transform group-hover:scale-105">
+            <HabitIcon name={habit.icon} size={22} />
           </div>
 
           <div className="flex-1 min-w-0">
             <h3
               className={`font-bold text-base tracking-tight truncate transition-colors ${
-                isCompleted ? 'text-zinc-400 line-through decoration-zinc-500/60' : 'text-white'
+                isCompleted ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-black dark:text-white'
               }`}
             >
               {habit.title}
             </h3>
             {habit.description && (
-              <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">{habit.description}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">{habit.description}</p>
             )}
 
             {/* Consistency & completions */}
-            <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-400">
+            <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
               <span>{stats.completionRate30d}% consistency (30d)</span>
               <span>•</span>
               <span>{stats.totalCompletions} completions</span>
@@ -200,28 +199,28 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
 
         {/* Note snippet if logged today */}
         {log?.notes && (
-          <div className="mt-3 p-2.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 flex items-start gap-2 shadow-inner">
-            <MessageSquare className="w-3.5 h-3.5 text-white shrink-0 mt-0.5" />
+          <div className="mt-3 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 flex items-start gap-2 shadow-inner">
+            <MessageSquare className="w-3.5 h-3.5 text-black dark:text-white shrink-0 mt-0.5" />
             <p className="italic line-clamp-2">"{log.notes}"</p>
           </div>
         )}
 
         {/* Bottom: Progress Bar & Action Buttons */}
-        <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between gap-4">
+        <div className="mt-4 pt-3.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-4">
           {habit.habitType === 'numeric' ? (
             /* Numeric Stepper & Progress */
             <div className="flex-1 flex flex-col gap-1.5">
               <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-zinc-300">
+                <span className="text-zinc-600 dark:text-zinc-400">
                   {currentValue} / {habit.targetValue} {habit.unit || 'units'}
                 </span>
-                <span className="text-white font-bold">
+                <span className="text-black dark:text-white font-bold">
                   {progressPercent}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-white transition-all duration-300 shadow-sm shadow-white/50"
+                  className="h-full rounded-full bg-black dark:bg-white transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -231,14 +230,14 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                 <button
                   onClick={() => incrementHabitValue(habit.id, -stepAmount, targetDate)}
                   disabled={currentValue <= 0}
-                  className="p-1 rounded-lg bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white border border-white/10 disabled:opacity-40 disabled:hover:bg-zinc-900 transition"
+                  className="p-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white border border-zinc-200 dark:border-zinc-800 disabled:opacity-40 transition"
                   title={`Decrease by ${stepAmount}`}
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => incrementHabitValue(habit.id, stepAmount, targetDate)}
-                  className="p-1 rounded-lg bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white border border-white/10 transition"
+                  className="p-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white border border-zinc-200 dark:border-zinc-800 transition"
                   title={`Increase by ${stepAmount}`}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -247,10 +246,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                 {/* Quick 100% Mark Check */}
                 <button
                   onClick={() => toggleHabitCompletion(habit.id, targetDate)}
-                  className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+                  className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 ${
                     isCompleted
-                      ? 'bg-white text-zinc-950 shadow-md shadow-white/20'
-                      : 'bg-zinc-900 text-white hover:bg-zinc-800 border border-white/15'
+                      ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
+                      : 'bg-zinc-100 text-black hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800'
                   }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -261,22 +260,22 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
           ) : (
             /* Boolean Checkbox Toggle */
             <div className="w-full flex items-center justify-between">
-              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-black dark:text-white" />
                 <span>Daily Ritual</span>
               </span>
 
               <button
                 onClick={() => toggleHabitCompletion(habit.id, targetDate)}
-                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-150 ${
                   isCompleted
-                    ? 'bg-white text-zinc-950 shadow-lg shadow-white/20 scale-[1.02]'
-                    : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/15'
+                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm scale-[1.02]'
+                    : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white border border-zinc-200 dark:border-zinc-800'
                 }`}
               >
                 <div
                   className={`w-4 h-4 rounded-md flex items-center justify-center transition-colors ${
-                    isCompleted ? 'bg-zinc-950 text-white' : 'border border-zinc-500'
+                    isCompleted ? 'bg-white text-black dark:bg-black dark:text-white' : 'border border-zinc-400 dark:border-zinc-600'
                   }`}
                 >
                   {isCompleted && <Check className="w-3 h-3 stroke-[3]" />}

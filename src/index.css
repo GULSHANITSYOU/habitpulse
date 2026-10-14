@@ -1,71 +1,70 @@
 @import "tailwindcss";
 
+:root {
+  --bg-app: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f4f4f5;
+  --border-subtle: #e4e4e7;
+  --border-hover: #000000;
+  --text-main: #000000;
+  --text-sub: #52525b;
+  --text-muted: #71717a;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 6px 20px -2px rgba(0, 0, 0, 0.08);
+  --card-shadow-active: 0 0 0 2px #000000;
+}
+
+html.dark {
+  --bg-app: #000000;
+  --bg-card: #09090b;
+  --bg-input: #18181b;
+  --border-subtle: #27272a;
+  --border-hover: #ffffff;
+  --text-main: #ffffff;
+  --text-sub: #a1a1aa;
+  --text-muted: #71717a;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 6px 20px -2px rgba(255, 255, 255, 0.08);
+  --card-shadow-active: 0 0 0 2px #ffffff;
+}
+
 @layer base {
   body {
-    @apply antialiased min-h-screen selection:bg-white selection:text-black transition-colors duration-200;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    @apply antialiased min-h-screen transition-colors duration-150;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
-
-  html.dark body {
-    background-color: #050507;
-    color: #f4f4f5;
-  }
-
-  html.light body {
-    background-color: #fafafa;
-    color: #09090b;
-  }
 }
 
-/* Minimalist Bright Shadow & Card styling */
+/* Minimalist B&W Card styling */
 .card-neo {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s ease-in-out;
 }
 
-html.dark .card-neo {
-  background: rgba(18, 18, 22, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
+.card-neo:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--card-shadow-hover);
 }
 
-html.dark .card-neo:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.8), 0 0 25px -4px rgba(255, 255, 255, 0.09);
+.card-active {
+  box-shadow: var(--card-shadow-active);
+  border-color: var(--border-hover);
 }
 
-html.dark .card-active {
-  background: rgba(24, 24, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: 0 0 35px -5px rgba(255, 255, 255, 0.14), 0 8px 24px -4px rgba(0, 0, 0, 0.8);
-}
-
-html.light .card-neo {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
-}
-
-html.light .card-neo:hover {
-  border-color: rgba(0, 0, 0, 0.18);
-  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08);
-}
-
-html.light .card-active {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.12);
-}
-
-/* Bright diffuse glow utility */
+/* Crisp shadow helpers */
 .glow-white-sm {
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.glow-white-md {
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.16), 0 0 60px rgba(255, 255, 255, 0.05);
+html.dark .glow-white-sm {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);
 }
 
-/* Minimal Custom scrollbars */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -74,15 +73,9 @@ html.light .card-active {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(148, 163, 184, 0.4);
   border-radius: 9999px;
 }
-html.light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-}
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(100, 116, 139, 0.7);
 }

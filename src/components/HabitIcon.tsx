@@ -56,26 +56,23 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string; size?: 
 export const POPULAR_ICONS = Object.keys(ICON_MAP);
 
 export const CATEGORY_COLORS: { [key: string]: { bg: string; text: string; border: string; accent: string } } = {
-  health: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', accent: '#10b981' },
-  fitness: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30', accent: '#f43f5e' },
-  productivity: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-500/30', accent: '#6366f1' },
-  mindfulness: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30', accent: '#a855f7' },
-  learning: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', accent: '#f59e0b' },
-  finance: { bg: 'bg-teal-500/10', text: 'text-teal-400', border: 'border-teal-500/30', accent: '#14b8a6' },
-  lifestyle: { bg: 'bg-sky-500/10', text: 'text-sky-400', border: 'border-sky-500/30', accent: '#0ea5e9' },
+  health: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  fitness: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  productivity: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  mindfulness: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  learning: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  finance: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
+  lifestyle: { bg: 'bg-zinc-100 dark:bg-zinc-900', text: 'text-black dark:text-white', border: 'border-zinc-200 dark:border-zinc-800', accent: '#000000' },
 };
 
 export const COLOR_OPTIONS = [
-  '#6366f1', // Indigo
-  '#06b6d4', // Cyan
-  '#10b981', // Emerald
-  '#f59e0b', // Amber
-  '#ef4444', // Red
-  '#ec4899', // Pink
-  '#8b5cf6', // Violet
-  '#14b8a6', // Teal
-  '#f97316', // Orange
-  '#3b82f6', // Blue
+  '#000000',
+  '#27272a',
+  '#52525b',
+  '#71717a',
+  '#a1a1aa',
+  '#d4d4d8',
+  '#ffffff',
 ];
 
 interface HabitIconProps {

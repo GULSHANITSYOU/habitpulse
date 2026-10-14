@@ -78,22 +78,22 @@ export const DailyOverview: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => changeDate(-1)}
-            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/5 transition"
+            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition"
             title="Previous Day"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-900 border border-white/10 shadow-sm">
-            <CalendarIcon className="w-4 h-4 text-white" />
-            <span className="font-bold text-sm sm:text-base text-white tracking-tight">
+          <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <CalendarIcon className="w-4 h-4 text-black dark:text-white" />
+            <span className="font-bold text-sm sm:text-base text-black dark:text-white tracking-tight">
               {formatDisplayDate(selectedDate)}
             </span>
           </div>
 
           <button
             onClick={() => changeDate(1)}
-            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/5 transition"
+            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition"
             title="Next Day"
           >
             <ChevronRight className="w-4 h-4" />
@@ -102,7 +102,7 @@ export const DailyOverview: React.FC = () => {
           {!isToday && (
             <button
               onClick={() => setSelectedDate(getTodayKey())}
-              className="px-3 py-1.5 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-bold text-xs hover:opacity-85 transition shadow-sm"
             >
               Today
             </button>
@@ -111,38 +111,35 @@ export const DailyOverview: React.FC = () => {
 
         {/* Search Input */}
         <div className="relative flex-1 max-w-xs">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search habits..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900/90 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white/30 transition shadow-inner"
+            className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-black dark:text-white placeholder-zinc-400 focus:outline-none focus:border-black dark:focus:border-white transition"
           />
         </div>
       </div>
 
-      {/* Hero Stats Card: Minimalist Bright-Shadow Card */}
-      <div className="card-neo card-active rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-        {/* Subtle glowing ambient light in the corner */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/[0.04] rounded-full blur-3xl pointer-events-none" />
-
+      {/* Hero Stats Card */}
+      <div className="card-neo card-active rounded-2xl p-6 sm:p-8 relative overflow-hidden">
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
           {/* Progress & Counter */}
           <div className="md:col-span-5 flex items-center gap-6">
             {/* Radial Ring */}
             <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" viewBox="0 0 36 36">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-zinc-800"
+                  className="text-zinc-200 dark:text-zinc-800"
                   strokeWidth="3.2"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className="text-white transition-all duration-700 ease-out"
+                  className="text-black dark:text-white transition-all duration-700 ease-out"
                   strokeDasharray={`${todaySummary.rate}, 100`}
                   strokeLinecap="round"
                   strokeWidth="3.2"
@@ -152,19 +149,19 @@ export const DailyOverview: React.FC = () => {
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-xl font-extrabold text-white tracking-tight">{todaySummary.rate}%</span>
-                <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Done</span>
+                <span className="text-xl font-extrabold text-black dark:text-white tracking-tight">{todaySummary.rate}%</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold">Done</span>
               </div>
             </div>
 
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-white tracking-tight">
+                <h2 className="text-2xl font-black text-black dark:text-white tracking-tight">
                   {todaySummary.completed} / {todaySummary.scheduled}
                 </h2>
-                <TrendingUp className="w-4 h-4 text-white" />
+                <TrendingUp className="w-4 h-4 text-black dark:text-white" />
               </div>
-              <p className="text-xs text-zinc-400 mt-1 font-medium">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
                 {todaySummary.rate === 100
                   ? "Flawless execution! All rituals completed today."
                   : todaySummary.rate >= 50
@@ -175,12 +172,12 @@ export const DailyOverview: React.FC = () => {
           </div>
 
           {/* Motivational Quote */}
-          <div className="md:col-span-7 md:border-l md:border-white/10 md:pl-8">
-            <div className="flex items-center gap-2 text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+          <div className="md:col-span-7 md:border-l md:border-zinc-200 dark:md:border-zinc-800 md:pl-8">
+            <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-wider mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-black dark:text-white" />
               <span>Daily Principle</span>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 italic font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 italic font-medium leading-relaxed">
               "{quote}"
             </p>
           </div>
@@ -195,10 +192,10 @@ export const DailyOverview: React.FC = () => {
             <button
               key={tf.id}
               onClick={() => setFilterTimeOfDay(tf.id)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
                 filterTimeOfDay === tf.id
-                  ? 'bg-white text-zinc-950 shadow-md shadow-white/10 font-bold'
-                  : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-white/5'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
+                  : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
               }`}
             >
               {tf.icon}
@@ -209,15 +206,15 @@ export const DailyOverview: React.FC = () => {
 
         {/* Category Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-          <Filter className="w-3.5 h-3.5 text-zinc-500 shrink-0 mr-1" />
+          <Filter className="w-3.5 h-3.5 text-zinc-400 shrink-0 mr-1" />
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setFilterCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
                 filterCategory === cat.id
-                  ? 'bg-white text-zinc-950 shadow-sm font-bold'
-                  : 'bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-white/5'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
+                  : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
               }`}
             >
               {cat.label}
