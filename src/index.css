@@ -1,31 +1,33 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --bg-app: #ffffff;
+  --bg-app: #f4f4f5;
   --bg-card: #ffffff;
   --bg-input: #f4f4f5;
   --border-subtle: #e4e4e7;
-  --border-hover: #000000;
-  --text-main: #000000;
+  --border-hover: #18181b;
+  --text-main: #09090b;
   --text-sub: #52525b;
   --text-muted: #71717a;
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  --card-shadow-hover: 0 6px 20px -2px rgba(0, 0, 0, 0.08);
-  --card-shadow-active: 0 0 0 2px #000000;
+  --card-shadow-hover: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  --card-shadow-active: 0 0 0 2px #09090b;
 }
 
 html.dark {
-  --bg-app: #000000;
-  --bg-card: #09090b;
-  --bg-input: #18181b;
+  --bg-app: #09090b;
+  --bg-card: #18181b;
+  --bg-input: #27272a;
   --border-subtle: #27272a;
-  --border-hover: #ffffff;
-  --text-main: #ffffff;
+  --border-hover: #3f3f46;
+  --text-main: #fafafa;
   --text-sub: #a1a1aa;
   --text-muted: #71717a;
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
-  --card-shadow-hover: 0 6px 20px -2px rgba(255, 255, 255, 0.08);
-  --card-shadow-active: 0 0 0 2px #ffffff;
+  --card-shadow-hover: 0 4px 12px -2px rgba(0, 0, 0, 0.7);
+  --card-shadow-active: 0 0 0 2px #fafafa;
 }
 
 @layer base {
@@ -39,20 +41,32 @@ html.dark {
 
 /* Minimalist B&W Card styling */
 .card-neo {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--card-shadow);
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
 }
 
+html.dark .card-neo {
+  background-color: #121214;
+  border: 1px solid #27272a;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
 .card-neo:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--card-shadow-hover);
+  border-color: #18181b;
+}
+
+html.dark .card-neo:hover {
+  border-color: #52525b;
 }
 
 .card-active {
-  box-shadow: var(--card-shadow-active);
-  border-color: var(--border-hover);
+  box-shadow: 0 0 0 2px #09090b;
+}
+
+html.dark .card-active {
+  box-shadow: 0 0 0 2px #52525b;
 }
 
 /* Crisp shadow helpers */

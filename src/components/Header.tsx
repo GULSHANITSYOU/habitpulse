@@ -120,7 +120,7 @@ export const Header: React.FC = () => {
                 title={user.darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                 className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
               >
-                {user.darkMode ? <Moon className="w-4 h-4 text-white" /> : <Sun className="w-4 h-4 text-black" />}
+                {user.darkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
               </button>
 
               {/* Backup & Import Button */}
