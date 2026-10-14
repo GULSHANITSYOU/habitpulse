@@ -65,3 +65,15 @@ export interface HabitStats {
   isCompletedToday: boolean;
   todayValue: number;
 }
+
+export interface TodoItem {
+  id: string;
+  title: string;
+  notes?: string;
+  completed: boolean;
+  important: boolean;
+  order: number;
+  dueDate?: string;
+  createdAt: string;
+  completedAt?: string;
+}

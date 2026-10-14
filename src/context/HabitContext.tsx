@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem } from '../types/habit';
 import {
   loadHabitsFromStorage,
   saveHabitsToStorage,
@@ -8,6 +8,8 @@ import {
   saveLogsToStorage,
   loadUserFromStorage,
   saveUserToStorage,
+  loadTodosFromStorage,
+  saveTodosToStorage,
   getInitialSeedData,
   resetSystemStorage,
 } from '../utils/storage';
@@ -23,11 +25,12 @@ import { soundFx } from '../utils/audio';
 interface HabitContextType {
   habits: Habit[];
   logs: HabitLog[];
+  todos: TodoItem[];
   user: UserProfile;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
-  activeTab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage';
-  setActiveTab: (tab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage') => void;
+  activeTab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos';
+  setActiveTab: (tab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos') => void;
   filterCategory: HabitCategory | 'all';
   setFilterCategory: (cat: HabitCategory | 'all') => void;
   filterTimeOfDay: TimeOfDay | 'all';
@@ -49,6 +52,15 @@ interface HabitContextType {
   setHabitNumericValue: (habitId: string, value: number, dateStr?: string) => void;
   incrementHabitValue: (habitId: string, delta: number, dateStr?: string) => void;
   updateHabitNotes: (habitId: string, notes: string, dateStr?: string) => void;
+
+  // To-Do Actions
+  addTodo: (title: string, notes?: string, important?: boolean, dueDate?: string) => void;
+  toggleTodo: (id: string) => void;
+  toggleTodoImportant: (id: string) => void;
+  updateTodo: (id: string, updates: Partial<TodoItem>) => void;
+  deleteTodo: (id: string) => void;
+  reorderTodos: (newTodos: TodoItem[]) => void;
+  clearCompletedTodos: () => void;
   
   // Settings & Storage
   resetToDefaults: () => void;
@@ -75,10 +87,11 @@ const HabitContext = createContext<HabitContextType | undefined>(undefined);
 export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [habits, setHabits] = useState<Habit[]>(() => loadHabitsFromStorage());
   const [logs, setLogs] = useState<HabitLog[]>(() => loadLogsFromStorage());
+  const [todos, setTodos] = useState<TodoItem[]>(() => loadTodosFromStorage());
   const [user, setUser] = useState<UserProfile>(() => loadUserFromStorage());
 
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
-  const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos'>('today');
   const [filterCategory, setFilterCategory] = useState<HabitCategory | 'all'>('all');
   const [filterTimeOfDay, setFilterTimeOfDay] = useState<TimeOfDay | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -92,6 +105,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     saveLogsToStorage(logs);
   }, [logs]);
+
+  // Persist todos on change
+  useEffect(() => {
+    saveTodosToStorage(todos);
+  }, [todos]);
 
   // Persist user and apply dark/light class
   useEffect(() => {
@@ -365,21 +383,104 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     triggerConfetti();
   }, [user.soundEnabled, triggerConfetti]);
 
+  // To-Do Actions
+  const addTodo = useCallback((title: string, notes?: string, important = false, dueDate?: string) => {
+    if (!title.trim()) return;
+    const newTodo: TodoItem = {
+      id: `td-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: title.trim(),
+      notes: notes?.trim() || undefined,
+      completed: false,
+      important,
+      order: 0,
+      dueDate,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTodos((prev) => {
+      const updated = prev.map((t) => ({ ...t, order: t.order + 1 }));
+      return [newTodo, ...updated];
+    });
+
+    soundFx.playTap(user.soundEnabled);
+    addXp(5);
+  }, [user.soundEnabled, addXp]);
+
+  const toggleTodo = useCallback((id: string) => {
+    setTodos((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const willBeDone = !t.completed;
+        if (willBeDone) {
+          soundFx.playCompletion(user.soundEnabled);
+          triggerConfetti();
+          addXp(15);
+        } else {
+          soundFx.playTap(user.soundEnabled);
+          addXp(-15);
+        }
+        return {
+          ...t,
+          completed: willBeDone,
+          completedAt: willBeDone ? new Date().toISOString() : undefined,
+        };
+      })
+    );
+  }, [user.soundEnabled, triggerConfetti, addXp]);
+
+  const toggleTodoImportant = useCallback((id: string) => {
+    setTodos((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        soundFx.playTap(user.soundEnabled);
+        return {
+          ...t,
+          important: !t.important,
+        };
+      })
+    );
+  }, [user.soundEnabled]);
+
+  const updateTodo = useCallback((id: string, updates: Partial<TodoItem>) => {
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const deleteTodo = useCallback((id: string) => {
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const reorderTodos = useCallback((newTodos: TodoItem[]) => {
+    const normalized = newTodos.map((t, index) => ({
+      ...t,
+      order: index,
+    }));
+    setTodos(normalized);
+  }, []);
+
+  const clearCompletedTodos = useCallback(() => {
+    setTodos((prev) => prev.filter((t) => !t.completed));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
   // Reset all data to rich seed demo
   const resetToDefaults = useCallback(() => {
     const initial = getInitialSeedData();
     setHabits(initial.habits);
     setLogs(initial.logs);
     setUser(initial.user);
+    setTodos(loadTodosFromStorage());
     soundFx.playTap(true);
   }, []);
 
-  // Reset full system: wipe all habits, all logs, reset user to Level 1 (0 XP)
+  // Reset full system: wipe all habits, all logs, all todos, reset user to Level 1 (0 XP)
   const resetFullSystem = useCallback(() => {
     const resetResult = resetSystemStorage(true);
     setHabits(resetResult.habits);
     setLogs(resetResult.logs);
     setUser(resetResult.user);
+    setTodos([]);
     setSelectedDate(getTodayKey());
     setActiveTab('today');
     soundFx.playTap(true);
@@ -392,10 +493,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       exportedAt: new Date().toISOString(),
       habits,
       logs,
+      todos,
       user,
     };
     return JSON.stringify(data, null, 2);
-  }, [habits, logs, user]);
+  }, [habits, logs, todos, user]);
 
   // Import JSON
   const importData = useCallback((jsonStr: string): boolean => {
@@ -406,6 +508,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (Array.isArray(parsed.logs)) {
         setLogs(parsed.logs);
+      }
+      if (Array.isArray(parsed.todos)) {
+        setTodos(parsed.todos);
       }
       if (parsed.user) {
         setUser(parsed.user);
@@ -468,6 +573,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         habits,
         logs,
+        todos,
         user,
         selectedDate,
         setSelectedDate,
@@ -492,6 +598,13 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setHabitNumericValue,
         incrementHabitValue,
         updateHabitNotes,
+        addTodo,
+        toggleTodo,
+        toggleTodoImportant,
+        updateTodo,
+        deleteTodo,
+        reorderTodos,
+        clearCompletedTodos,
         resetToDefaults,
         resetFullSystem,
         importData,

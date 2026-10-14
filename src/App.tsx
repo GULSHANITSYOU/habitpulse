@@ -7,6 +7,7 @@ import { WeeklyMatrix } from './components/WeeklyMatrix';
 import { HeatmapView } from './components/HeatmapView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { ManageHabitsView } from './components/ManageHabitsView';
+import { TodosView } from './components/TodosView';
 import { parseDateKey, isHabitScheduledForDate } from './utils/dateUtils';
 import { Plus, Sparkles, CheckCircle2 } from 'lucide-react';
 import { HabitModal } from './components/HabitModal';
@@ -130,6 +131,12 @@ const MainContent: React.FC = () => {
         {activeTab === 'heatmap' && (
           <div className="animate-in fade-in duration-300">
             <HeatmapView />
+          </div>
+        )}
+
+        {activeTab === 'todos' && (
+          <div className="animate-in fade-in duration-300">
+            <TodosView />
           </div>
         )}
 

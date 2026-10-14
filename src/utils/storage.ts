@@ -1,10 +1,11 @@
-import type { Habit, HabitLog, UserProfile } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, TodoItem } from '../types/habit';
 import { formatDateKey } from './dateUtils';
 
 export const STORAGE_KEYS = {
   HABITS: 'habitpulse_habits_v1',
   LOGS: 'habitpulse_logs_v1',
   USER: 'habitpulse_user_v1',
+  TODOS: 'habitpulse_todos_v1',
   INITIALIZED: 'habitpulse_initialized_v1',
 };
 
@@ -204,6 +205,7 @@ export function resetSystemStorage(preserveTheme = true): { habits: Habit[]; log
     };
     saveHabitsToStorage([]);
     saveLogsToStorage([]);
+    saveTodosToStorage([]);
     saveUserToStorage(resetUser);
     localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
     return {
@@ -271,6 +273,60 @@ export function saveUserToStorage(user: UserProfile): void {
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   } catch (err) {
     console.error('Failed to save user to storage', err);
+  }
+}
+
+// Initial sample todos
+export const defaultSeedTodos: TodoItem[] = [
+  {
+    id: 'td-1',
+    title: 'Review today’s habit streak & hydration target',
+    notes: 'Check off morning rituals and stay consistent',
+    completed: false,
+    important: true,
+    order: 0,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'td-2',
+    title: 'Plan tomorrow’s deep work sprint',
+    notes: 'Pick top 2 Most Important Tasks for morning focus',
+    completed: false,
+    important: false,
+    order: 1,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'td-3',
+    title: 'Complete weekly HabitPulse consistency review',
+    completed: true,
+    important: false,
+    order: 2,
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    completedAt: new Date().toISOString(),
+  },
+];
+
+export function loadTodosFromStorage(): TodoItem[] {
+  try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const data = localStorage.getItem(STORAGE_KEYS.TODOS);
+    if (!data && !isInitialized) {
+      saveTodosToStorage(defaultSeedTodos);
+      return defaultSeedTodos;
+    }
+    return data ? JSON.parse(data) : [];
+  } catch (err) {
+    console.error('Failed to load todos from storage', err);
+    return [];
+  }
+}
+
+export function saveTodosToStorage(todos: TodoItem[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.TODOS, JSON.stringify(todos));
+  } catch (err) {
+    console.error('Failed to save todos to storage', err);
   }
 }
 

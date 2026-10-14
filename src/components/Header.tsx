@@ -14,6 +14,7 @@ import {
   Flame,
   Award,
   RotateCcw,
+  CheckSquare,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { HabitModal } from './HabitModal';
@@ -28,6 +29,7 @@ export const Header: React.FC = () => {
     toggleSound,
     toggleTheme,
     habits,
+    todos,
     getHabitStats,
     resetFullSystem,
   } = useHabits();
@@ -37,6 +39,8 @@ export const Header: React.FC = () => {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const activeHabits = habits.filter((h) => !h.archived);
+  const activeTodosCount = todos.filter((t) => !t.completed).length;
+
   const maxStreak = activeHabits.reduce((max, h) => {
     const stats = getHabitStats(h);
     return Math.max(max, stats.currentStreak);
@@ -45,13 +49,19 @@ export const Header: React.FC = () => {
   const xpCurrentLevel = user.xp % 150;
   const xpPercent = Math.min(100, Math.round((xpCurrentLevel / 150) * 100));
 
-  const navItems = [
+  const navItems: {
+    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'analytics' | 'manage';
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: number;
+  }[] = [
     { id: 'today', label: 'Today', icon: Calendar },
     { id: 'weekly', label: 'Weekly Grid', icon: Grid },
     { id: 'heatmap', label: 'Heatmap', icon: Sparkles },
+    { id: 'todos', label: 'To-Dos', icon: CheckSquare, badge: activeTodosCount > 0 ? activeTodosCount : undefined },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'manage', label: 'All Habits', icon: ListTodo },
-  ] as const;
+  ];
 
   return (
     <>
@@ -173,6 +183,17 @@ export const Header: React.FC = () => {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{item.label}</span>
+                  {item.badge !== undefined && (
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                        isActive
+                          ? 'bg-zinc-800 text-white dark:bg-zinc-200 dark:text-black'
+                          : 'bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
