@@ -10,7 +10,6 @@ export const WeeklyMatrix: React.FC = () => {
 
   const activeHabits = habits.filter((h) => !h.archived);
 
-  // Navigate week forward or backward
   const changeWeek = (direction: number) => {
     const next = new Date(referenceDate);
     next.setDate(next.getDate() + direction * 7);
@@ -28,13 +27,13 @@ export const WeeklyMatrix: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Week Navigator */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4 sm:p-5">
+      <div className="card-neo rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-100">Weekly Consistency Matrix</h2>
+            <Calendar className="w-4 h-4 text-white" />
+            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Weekly Consistency Matrix</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-zinc-400 mt-0.5">
             Glance at your habit progress across {weekStartStr} – {weekEndStr}
           </p>
         </div>
@@ -42,20 +41,20 @@ export const WeeklyMatrix: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => changeWeek(-1)}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/5 transition"
             title="Previous Week"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={resetToCurrentWeek}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition"
+            className="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white border border-white/10 transition"
           >
             Current Week
           </button>
           <button
             onClick={() => changeWeek(1)}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/5 transition"
             title="Next Week"
           >
             <ChevronRight className="w-4 h-4" />
@@ -64,25 +63,25 @@ export const WeeklyMatrix: React.FC = () => {
       </div>
 
       {/* Grid Container */}
-      <div className="overflow-x-auto rounded-3xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-sm shadow-xl">
+      <div className="overflow-x-auto rounded-3xl card-neo p-2">
         <table className="w-full border-collapse text-left min-w-[700px]">
           <thead>
-            <tr className="border-b border-slate-800/80 bg-slate-950/60">
-              <th className="py-4 px-5 text-xs font-bold uppercase tracking-wider text-slate-400 w-64">
+            <tr className="border-b border-white/10 bg-zinc-950/40">
+              <th className="py-4 px-5 text-xs font-bold uppercase tracking-wider text-zinc-400 w-64">
                 Habit
               </th>
               {weekDays.map((day) => (
                 <th
                   key={day.key}
                   className={`py-3 px-2 text-center text-xs font-bold transition-colors ${
-                    day.isToday ? 'bg-indigo-600/10 text-indigo-300' : 'text-slate-400'
+                    day.isToday ? 'bg-white/5 text-white' : 'text-zinc-400'
                   }`}
                 >
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-[11px] font-medium">{day.shortName}</span>
                     <span
                       className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${
-                        day.isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-200'
+                        day.isToday ? 'bg-white text-zinc-950 shadow-md shadow-white/30' : 'text-zinc-300'
                       }`}
                     >
                       {day.dayNum}
@@ -90,16 +89,15 @@ export const WeeklyMatrix: React.FC = () => {
                   </div>
                 </th>
               ))}
-              <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400 w-24">
+              <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-400 w-24">
                 Progress
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/50">
+          <tbody className="divide-y divide-white/5">
             {activeHabits.map((habit) => {
               const stats = getHabitStats(habit);
 
-              // Calculate weekly completed count for this habit
               let scheduledThisWeek = 0;
               let completedThisWeek = 0;
 
@@ -115,33 +113,26 @@ export const WeeklyMatrix: React.FC = () => {
               });
 
               return (
-                <tr key={habit.id} className="hover:bg-slate-800/30 transition-colors">
+                <tr key={habit.id} className="hover:bg-white/[0.02] transition-colors">
                   {/* Habit Info Cell */}
                   <td className="py-3.5 px-5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
-                        style={{
-                          backgroundColor: `${habit.color}15`,
-                          borderColor: `${habit.color}35`,
-                          color: habit.color,
-                        }}
-                      >
-                        <HabitIcon name={habit.icon} size={18} color={habit.color} />
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-white/10 border border-white/15 text-white">
+                        <HabitIcon name={habit.icon} size={16} color="#ffffff" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-xs sm:text-sm text-slate-200 truncate">
+                          <span className="font-semibold text-xs sm:text-sm text-zinc-200 truncate">
                             {habit.title}
                           </span>
                           {stats.currentStreak > 0 && (
-                            <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-400">
-                              <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
+                            <span className="flex items-center gap-0.5 text-[10px] font-bold text-white">
+                              <Flame className="w-3 h-3 fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.7)]" />
                               {stats.currentStreak}
                             </span>
                           )}
                         </div>
-                        <span className="text-[11px] text-slate-500 capitalize">
+                        <span className="text-[11px] text-zinc-500 capitalize">
                           {habit.category}
                         </span>
                       </div>
@@ -156,9 +147,9 @@ export const WeeklyMatrix: React.FC = () => {
 
                     if (!isScheduled) {
                       return (
-                        <td key={day.key} className="py-3 px-2 text-center text-slate-600">
+                        <td key={day.key} className="py-3 px-2 text-center text-zinc-600">
                           <div className="flex items-center justify-center">
-                            <Minus className="w-3.5 h-3.5 opacity-40" />
+                            <Minus className="w-3.5 h-3.5 opacity-30" />
                           </div>
                         </td>
                       );
@@ -174,19 +165,14 @@ export const WeeklyMatrix: React.FC = () => {
                             }`}
                             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 ${
                               isDone
-                                ? 'shadow-md ring-1'
-                                : 'border border-slate-700/80 hover:border-slate-500 bg-slate-900/60 hover:bg-slate-800'
+                                ? 'bg-white text-zinc-950 shadow-md shadow-white/20 font-bold'
+                                : 'border border-white/10 hover:border-white/30 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-500'
                             }`}
-                            style={{
-                              backgroundColor: isDone ? habit.color : undefined,
-                              color: isDone ? '#ffffff' : '#64748b',
-                              boxShadow: isDone ? `0 0 12px ${habit.color}50` : undefined,
-                            }}
                           >
                             {isDone ? (
                               <Check className="w-4 h-4 stroke-[3]" />
                             ) : (
-                              <span className="w-2 h-2 rounded-full bg-slate-700" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
                             )}
                           </button>
                         </div>
@@ -196,7 +182,7 @@ export const WeeklyMatrix: React.FC = () => {
 
                   {/* Weekly Progress Total */}
                   <td className="py-3.5 px-4 text-center">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-800/80 text-slate-300">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/10 text-white border border-white/15">
                       {completedThisWeek}/{scheduledThisWeek}
                     </span>
                   </td>

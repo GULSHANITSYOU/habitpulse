@@ -2,33 +2,87 @@
 
 @layer base {
   body {
-    @apply antialiased min-h-screen selection:bg-indigo-500 selection:text-white transition-colors duration-200;
+    @apply antialiased min-h-screen selection:bg-white selection:text-black transition-colors duration-200;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   html.dark body {
-    background-color: #020617;
-    color: #f8fafc;
+    background-color: #050507;
+    color: #f4f4f5;
   }
 
   html.light body {
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: #fafafa;
+    color: #09090b;
   }
 }
 
-/* Custom scrollbars */
+/* Minimalist Bright Shadow & Card styling */
+.card-neo {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .card-neo {
+  background: rgba(18, 18, 22, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+html.dark .card-neo:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.8), 0 0 25px -4px rgba(255, 255, 255, 0.09);
+}
+
+html.dark .card-active {
+  background: rgba(24, 24, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 35px -5px rgba(255, 255, 255, 0.14), 0 8px 24px -4px rgba(0, 0, 0, 0.8);
+}
+
+html.light .card-neo {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+html.light .card-neo:hover {
+  border-color: rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08);
+}
+
+html.light .card-active {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.12);
+}
+
+/* Bright diffuse glow utility */
+.glow-white-sm {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.glow-white-md {
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.16), 0 0 60px rgba(255, 255, 255, 0.05);
+}
+
+/* Minimal Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.3);
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }

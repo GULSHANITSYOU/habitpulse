@@ -10,30 +10,26 @@ import {
   Target,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
-import { HabitIcon, CATEGORY_COLORS } from './HabitIcon';
+import { HabitIcon } from './HabitIcon';
 
 export const AnalyticsView: React.FC = () => {
   const { habits, logs, user, getHabitStats } = useHabits();
 
   const activeHabits = habits.filter((h) => !h.archived);
 
-  // Compute all stats
   const habitStatsList = activeHabits.map((habit) => ({
     habit,
     stats: getHabitStats(habit),
   }));
 
-  // Sort by highest streak
   const sortedByStreak = [...habitStatsList].sort(
     (a, b) => b.stats.currentStreak - a.stats.currentStreak
   );
 
-  // Sort by completion rate
   const sortedByRate = [...habitStatsList].sort(
     (a, b) => b.stats.completionRate30d - a.stats.completionRate30d
   );
 
-  // Overall 30-day average rate
   const overallRate =
     habitStatsList.length > 0
       ? Math.round(
@@ -42,16 +38,13 @@ export const AnalyticsView: React.FC = () => {
         )
       : 0;
 
-  // Total check-ins logged all time
   const totalCompletionsAllTime = logs.filter((l) => l.completed).length;
 
-  // Category distribution
   const categoryCounts: Record<string, number> = {};
   activeHabits.forEach((h) => {
     categoryCounts[h.category] = (categoryCounts[h.category] || 0) + 1;
   });
 
-  // Gamification achievements
   const achievements = [
     {
       id: 'first_step',
@@ -85,60 +78,60 @@ export const AnalyticsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner: Metrics Summary */}
+      {/* Top Banner: Metrics Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/30 to-slate-900/50 border border-indigo-500/20">
+        <div className="card-neo card-active p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-indigo-400">Consistency (30d)</span>
-            <TrendingUp className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">Consistency (30d)</span>
+            <TrendingUp className="w-4 h-4 text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-100">{overallRate}%</span>
-            <span className="text-xs text-slate-400">average</span>
+            <span className="text-3xl font-black text-white tracking-tight">{overallRate}%</span>
+            <span className="text-xs text-zinc-400">average</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden">
-            <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${overallRate}%` }} />
+          <div className="w-full h-1.5 bg-zinc-800 rounded-full mt-3 overflow-hidden">
+            <div className="h-full bg-white rounded-full shadow-sm shadow-white/50" style={{ width: `${overallRate}%` }} />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/50 border border-slate-800/80">
+        <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-amber-400">Total Check-ins</span>
-            <CheckCircle2 className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Total Check-ins</span>
+            <CheckCircle2 className="w-4 h-4 text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-100">{totalCompletionsAllTime}</span>
-            <span className="text-xs text-slate-400">rituals logged</span>
+            <span className="text-3xl font-black text-white tracking-tight">{totalCompletionsAllTime}</span>
+            <span className="text-xs text-zinc-400">rituals</span>
           </div>
-          <p className="text-xs text-slate-500 mt-2">Lifelong habit repetitions</p>
+          <p className="text-xs text-zinc-500 mt-2 font-medium">Lifelong habit repetitions</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/50 border border-slate-800/80">
+        <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-emerald-400">Player Level</span>
-            <Award className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Player Level</span>
+            <Award className="w-4 h-4 text-white" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-100">Lvl {user.level}</span>
-            <span className="text-xs text-emerald-400 font-semibold">{user.xp} XP</span>
+            <span className="text-3xl font-black text-white tracking-tight">Lvl {user.level}</span>
+            <span className="text-xs text-white font-semibold">({user.xp} XP)</span>
           </div>
-          <p className="text-xs text-slate-500 mt-2">{150 - (user.xp % 150)} XP to next level</p>
+          <p className="text-xs text-zinc-500 mt-2 font-medium">{150 - (user.xp % 150)} XP to next level</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/50 border border-slate-800/80">
+        <div className="card-neo p-5 rounded-2xl">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-rose-400">Top Streak</span>
-            <Flame className="w-4 h-4 text-rose-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Top Streak</span>
+            <Flame className="w-4 h-4 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-100">
+            <span className="text-3xl font-black text-white tracking-tight">
               {sortedByStreak[0]?.stats.currentStreak || 0}d
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-zinc-400">
               Best: {sortedByStreak[0]?.stats.longestStreak || 0}d
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-2 truncate">
+          <p className="text-xs text-zinc-500 mt-2 truncate font-medium">
             {sortedByStreak[0]?.habit.title || 'None active'}
           </p>
         </div>
@@ -147,54 +140,44 @@ export const AnalyticsView: React.FC = () => {
       {/* Grid: Consistency Ranking & Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Habit Consistency Ranking */}
-        <div className="lg:col-span-8 p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 shadow-xl space-y-4">
+        <div className="lg:col-span-8 p-6 rounded-3xl card-neo space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-base text-slate-100">Consistency Ranking</h3>
-              <p className="text-xs text-slate-400">Habits ranked by 30-day completion reliability</p>
+              <h3 className="font-bold text-base text-white tracking-tight">Consistency Ranking</h3>
+              <p className="text-xs text-zinc-400">Habits ranked by 30-day completion reliability</p>
             </div>
-            <Clock className="w-4 h-4 text-slate-500" />
+            <Clock className="w-4 h-4 text-zinc-500" />
           </div>
 
-          <div className="space-y-3.5 pt-2">
+          <div className="space-y-3 pt-2">
             {sortedByRate.map(({ habit, stats }) => (
-              <div key={habit.id} className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center border"
-                      style={{
-                        backgroundColor: `${habit.color}15`,
-                        borderColor: `${habit.color}35`,
-                        color: habit.color,
-                      }}
-                    >
-                      <HabitIcon name={habit.icon} size={15} color={habit.color} />
+              <div key={habit.id} className="p-4 rounded-2xl bg-zinc-900 border border-white/5">
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/10 border border-white/15 text-white">
+                      <HabitIcon name={habit.icon} size={15} color="#ffffff" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-200">{habit.title}</span>
-                      <span className="text-[11px] text-slate-500 ml-2 capitalize">({habit.category})</span>
+                      <span className="text-xs font-bold text-white">{habit.title}</span>
+                      <span className="text-[11px] text-zinc-400 ml-2 capitalize">({habit.category})</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 text-xs font-semibold">
                     {stats.currentStreak > 0 && (
-                      <span className="flex items-center gap-1 text-amber-400">
-                        <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                      <span className="flex items-center gap-1 text-white">
+                        <Flame className="w-3.5 h-3.5 fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]" />
                         {stats.currentStreak}d
                       </span>
                     )}
-                    <span className="text-indigo-400 font-bold">{stats.completionRate30d}%</span>
+                    <span className="text-white font-black">{stats.completionRate30d}%</span>
                   </div>
                 </div>
 
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${stats.completionRate30d}%`,
-                      backgroundColor: habit.color,
-                    }}
+                    className="h-full rounded-full bg-white transition-all duration-500 shadow-sm shadow-white/40"
+                    style={{ width: `${stats.completionRate30d}%` }}
                   />
                 </div>
               </div>
@@ -205,27 +188,23 @@ export const AnalyticsView: React.FC = () => {
         {/* Category Distribution & Gamification Badges */}
         <div className="lg:col-span-4 space-y-6">
           {/* Categories */}
-          <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 shadow-xl space-y-4">
-            <h3 className="font-bold text-base text-slate-100">Life Balance Breakdown</h3>
-            <p className="text-xs text-slate-400">Distribution across routine dimensions</p>
+          <div className="p-6 rounded-3xl card-neo space-y-4">
+            <h3 className="font-bold text-base text-white tracking-tight">Life Dimensions</h3>
+            <p className="text-xs text-zinc-400">Distribution across routine dimensions</p>
 
             <div className="space-y-3 pt-2">
               {Object.entries(categoryCounts).map(([cat, count]) => {
                 const percent = Math.round((count / activeHabits.length) * 100);
-                const style = CATEGORY_COLORS[cat] || CATEGORY_COLORS.productivity;
                 return (
                   <div key={cat} className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-medium">
-                      <span className="capitalize text-slate-300">{cat}</span>
-                      <span className="text-slate-400">{count} habits ({percent}%)</span>
+                      <span className="capitalize text-zinc-200">{cat}</span>
+                      <span className="text-zinc-400">{count} habits ({percent}%)</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${percent}%`,
-                          backgroundColor: style.accent,
-                        }}
+                        className="h-full rounded-full bg-white shadow-xs shadow-white/40"
+                        style={{ width: `${percent}%` }}
                       />
                     </div>
                   </div>
@@ -235,8 +214,8 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           {/* Badges */}
-          <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 shadow-xl space-y-4">
-            <h3 className="font-bold text-base text-slate-100">Milestone Trophies</h3>
+          <div className="p-6 rounded-3xl card-neo space-y-4">
+            <h3 className="font-bold text-base text-white tracking-tight">Milestones</h3>
 
             <div className="grid grid-cols-2 gap-3 pt-1">
               {achievements.map((ach) => {
@@ -244,21 +223,21 @@ export const AnalyticsView: React.FC = () => {
                 return (
                   <div
                     key={ach.id}
-                    className={`p-3 rounded-2xl border text-center transition ${
+                    className={`p-3.5 rounded-2xl border text-center transition ${
                       ach.unlocked
-                        ? 'bg-indigo-950/30 border-indigo-500/30 text-indigo-300 shadow-sm'
-                        : 'bg-slate-950/40 border-slate-800/60 text-slate-600 opacity-60'
+                        ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                        : 'bg-zinc-900/40 border-white/5 text-zinc-600 opacity-50'
                     }`}
                   >
                     <div
-                      className={`w-9 h-9 mx-auto rounded-xl flex items-center justify-center mb-2 ${
-                        ach.unlocked ? 'bg-indigo-600/20 text-indigo-400' : 'bg-slate-800 text-slate-600'
+                      className={`w-8 h-8 mx-auto rounded-xl flex items-center justify-center mb-2 ${
+                        ach.unlocked ? 'bg-white text-zinc-950 font-bold' : 'bg-zinc-800 text-zinc-600'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div className="text-xs font-bold leading-tight truncate">{ach.title}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-2">{ach.desc}</div>
+                    <div className="text-xs font-bold leading-tight truncate text-white">{ach.title}</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{ach.desc}</div>
                   </div>
                 );
               })}
