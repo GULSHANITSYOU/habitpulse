@@ -19,7 +19,7 @@ import { HABIT_TEMPLATES } from '../utils/storage';
 export const ManageHabitsView: React.FC = () => {
   const {
     habits,
-    deleteHabit,
+    requestDeleteHabit,
     toggleArchiveHabit,
     loadTemplate,
     getHabitStats,
@@ -223,11 +223,7 @@ export const ManageHabitsView: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete "${habit.title}"?`)) {
-                            deleteHabit(habit.id);
-                          }
-                        }}
+                        onClick={() => requestDeleteHabit(habit.id, habit.title)}
                         className="p-2 rounded-xl text-zinc-400 hover:text-rose-400 bg-zinc-900 hover:bg-rose-500/10 border border-white/10 transition"
                         title="Delete Habit"
                       >

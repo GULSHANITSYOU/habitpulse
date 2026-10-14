@@ -14,6 +14,7 @@ export const defaultUserProfile: UserProfile = {
   level: 3,
   soundEnabled: true,
   darkMode: true,
+  skipDeleteConfirm: false,
 };
 
 // Generate seed habits and historical logs for realistic immediate experience

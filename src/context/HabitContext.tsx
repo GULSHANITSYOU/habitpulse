@@ -38,6 +38,11 @@ interface HabitContextType {
   addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'archived'>) => void;
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
+  requestDeleteHabit: (id: string, title: string) => void;
+  deletePendingHabit: { id: string; title: string } | null;
+  confirmDeleteHabit: (rememberChoice: boolean) => void;
+  cancelDeleteHabit: () => void;
+  resetDeleteConfirmPreference: () => void;
   toggleArchiveHabit: (id: string) => void;
   toggleHabitCompletion: (habitId: string, dateStr?: string) => void;
   setHabitNumericValue: (habitId: string, value: number, dateStr?: string) => void;
@@ -301,6 +306,33 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(user.soundEnabled);
   }, [user.soundEnabled]);
 
+  const [deletePendingHabit, setDeletePendingHabit] = useState<{ id: string; title: string } | null>(null);
+
+  const requestDeleteHabit = useCallback((id: string, title: string) => {
+    if (user.skipDeleteConfirm) {
+      deleteHabit(id);
+    } else {
+      setDeletePendingHabit({ id, title });
+    }
+  }, [user.skipDeleteConfirm, deleteHabit]);
+
+  const confirmDeleteHabit = useCallback((rememberChoice: boolean) => {
+    if (!deletePendingHabit) return;
+    if (rememberChoice) {
+      setUser((prev) => ({ ...prev, skipDeleteConfirm: true }));
+    }
+    deleteHabit(deletePendingHabit.id);
+    setDeletePendingHabit(null);
+  }, [deletePendingHabit, deleteHabit]);
+
+  const cancelDeleteHabit = useCallback(() => {
+    setDeletePendingHabit(null);
+  }, []);
+
+  const resetDeleteConfirmPreference = useCallback(() => {
+    setUser((prev) => ({ ...prev, skipDeleteConfirm: false }));
+  }, []);
+
   // Toggle archive status
   const toggleArchiveHabit = useCallback((id: string) => {
     setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, archived: !h.archived } : h)));
@@ -437,6 +469,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addHabit,
         updateHabit,
         deleteHabit,
+        requestDeleteHabit,
+        deletePendingHabit,
+        confirmDeleteHabit,
+        cancelDeleteHabit,
+        resetDeleteConfirmPreference,
         toggleArchiveHabit,
         toggleHabitCompletion,
         setHabitNumericValue,

@@ -10,6 +10,7 @@ import { ManageHabitsView } from './components/ManageHabitsView';
 import { parseDateKey, isHabitScheduledForDate } from './utils/dateUtils';
 import { Plus, Sparkles, CheckCircle2 } from 'lucide-react';
 import { HabitModal } from './components/HabitModal';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 
 const MainContent: React.FC = () => {
   const {
@@ -20,6 +21,9 @@ const MainContent: React.FC = () => {
     filterTimeOfDay,
     searchQuery,
     getHabitLog,
+    deletePendingHabit,
+    confirmDeleteHabit,
+    cancelDeleteHabit,
   } = useHabits();
 
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = React.useState(false);
@@ -157,6 +161,15 @@ const MainContent: React.FC = () => {
         <HabitModal
           isOpen={isNewHabitModalOpen}
           onClose={() => setIsNewHabitModalOpen(false)}
+        />
+      )}
+
+      {deletePendingHabit && (
+        <DeleteConfirmModal
+          isOpen={Boolean(deletePendingHabit)}
+          habitTitle={deletePendingHabit.title}
+          onConfirm={confirmDeleteHabit}
+          onCancel={cancelDeleteHabit}
         />
       )}
     </div>

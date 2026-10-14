@@ -53,6 +53,7 @@ export interface UserProfile {
   level: number;
   soundEnabled: boolean;
   darkMode: boolean;
+  skipDeleteConfirm?: boolean;
 }
 
 export interface HabitStats {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, Upload, RefreshCw, Copy, Check, AlertTriangle } from 'lucide-react';
+import { X, Download, Upload, RefreshCw, Copy, Check, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 
 interface ExportImportModalProps {
@@ -8,10 +8,19 @@ interface ExportImportModalProps {
 }
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, onClose }) => {
-  const { exportData, importData, resetToDefaults } = useHabits();
+  const {
+    exportData,
+    importData,
+    resetToDefaults,
+    user,
+    resetDeleteConfirmPreference,
+  } = useHabits();
+
   const [copied, setCopied] = useState(false);
   const [importJson, setImportJson] = useState('');
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetPromptPrefMsg, setResetPromptPrefMsg] = useState(false);
 
   if (!isOpen) return null;
 
@@ -59,11 +68,16 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
     reader.readAsText(file);
   };
 
-  const handleReset = () => {
-    if (confirm('Reset your habits back to the curated starter routines?')) {
-      resetToDefaults();
-      onClose();
-    }
+  const handleConfirmReset = () => {
+    resetToDefaults();
+    setShowResetConfirm(false);
+    onClose();
+  };
+
+  const handleRestoreDeletePrompts = () => {
+    resetDeleteConfirmPreference();
+    setResetPromptPrefMsg(true);
+    setTimeout(() => setResetPromptPrefMsg(false), 2500);
   };
 
   return (
@@ -74,8 +88,8 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
       >
         <div className="flex items-center justify-between pb-4 border-b border-white/10">
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">Data Management & Backup</h2>
-            <p className="text-xs text-zinc-400">Export your routines or restore from a JSON file</p>
+            <h2 className="text-lg font-bold text-white tracking-tight">Data Management & Preferences</h2>
+            <p className="text-xs text-zinc-400">Export routines, restore backups, or manage safety preferences</p>
           </div>
           <button
             onClick={onClose}
@@ -99,6 +113,30 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
               <span>{statusMessage.text}</span>
             </div>
           )}
+
+          {/* Delete Prompt Preference Section */}
+          <div className="p-3.5 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-white">Habit Deletion Confirmations</h4>
+                <p className="text-[10px] text-zinc-400">
+                  {user.skipDeleteConfirm
+                    ? 'Currently set to: Delete immediately without confirmation'
+                    : 'Currently set to: Always ask for confirmation before deleting'}
+                </p>
+              </div>
+            </div>
+
+            {user.skipDeleteConfirm && (
+              <button
+                onClick={handleRestoreDeletePrompts}
+                className="px-3 py-1.5 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition shadow-sm shrink-0"
+              >
+                {resetPromptPrefMsg ? 'Re-enabled!' : 'Re-enable Prompts'}
+              </button>
+            )}
+          </div>
 
           {/* Export Section */}
           <div className="space-y-3">
@@ -166,18 +204,36 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({ isOpen, on
 
           {/* Reset Demo Section */}
           <div className="space-y-2 pt-2 border-t border-white/10">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h4 className="text-xs font-bold text-zinc-300">Starter Demo Data</h4>
                 <p className="text-[11px] text-zinc-500">Restore the curated habit routines and history</p>
               </div>
-              <button
-                onClick={handleReset}
-                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Reset Demo</span>
-              </button>
+
+              {!showResetConfirm ? (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition self-start sm:self-center"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reset Demo</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowResetConfirm(false)}
+                    className="px-3 py-1 rounded-lg text-xs text-zinc-400 hover:text-white transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmReset}
+                    className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md transition"
+                  >
+                    Confirm Reset
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

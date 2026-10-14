@@ -32,7 +32,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
     toggleHabitCompletion,
     incrementHabitValue,
     getHabitStats,
-    deleteHabit,
+    requestDeleteHabit,
     toggleArchiveHabit,
   } = useHabits();
 
@@ -156,9 +156,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);
-                        if (confirm(`Delete habit "${habit.title}" permanently?`)) {
-                          deleteHabit(habit.id);
-                        }
+                        requestDeleteHabit(habit.id, habit.title);
                       }}
                       className="w-full px-3 py-2 text-left flex items-center gap-2 text-rose-400 hover:bg-rose-500/10 transition"
                     >
