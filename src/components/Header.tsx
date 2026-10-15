@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { SignInButton, SignUpButton, Show, UserButton } from '@clerk/react';
 import {
   Sparkles,
   Volume2,
@@ -16,11 +17,9 @@ import {
   RotateCcw,
   CheckSquare,
   LogIn,
-  LogOut,
   Cloud,
   HardDrive,
   Crown,
-  ChevronDown,
   RefreshCw,
   AlertCircle,
 } from 'lucide-react';
@@ -44,32 +43,14 @@ export const Header: React.FC = () => {
   } = useHabits();
 
   const {
-    currentUser,
     isPremium,
-    subscriptionPlan,
     cloudSyncStatus,
-    openAuthModal,
     openPricingModal,
-    logout,
   } = useAuth();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // Close user dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setIsUserMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const activeHabits = habits.filter((h) => !h.archived);
   const activeTodosCount = todos.filter((t) => !t.completed).length;
@@ -245,166 +226,34 @@ export const Header: React.FC = () => {
                 <RotateCcw className="w-4 h-4" />
               </button>
 
-              {/* User Authentication / Profile Dropdown */}
-              {!currentUser ? (
-                <button
-                  onClick={openAuthModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95 shrink-0"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Sign In</span>
-                </button>
-              ) : (
-                <div className="relative shrink-0" ref={userMenuRef}>
-                  <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    aria-label="User menu"
-                    className="flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition shrink-0"
-                  >
-                    {currentUser.avatarUrl ? (
-                      <img
-                        src={currentUser.avatarUrl}
-                        alt="User"
-                        className="w-6 h-6 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-lg bg-black text-white dark:bg-white dark:text-black text-[11px] font-bold flex items-center justify-center uppercase">
-                        {(currentUser.fullName || currentUser.email || 'U')[0]}
-                      </div>
-                    )}
-                    <span className="hidden sm:inline text-xs font-bold text-black dark:text-white max-w-[90px] truncate">
-                      {currentUser.fullName || currentUser.email.split('@')[0]}
-                    </span>
-                    <ChevronDown className="hidden sm:inline w-3.5 h-3.5 text-zinc-500" />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                      {/* User Info Header */}
-                      <div className="p-2 border-b border-zinc-100 dark:border-zinc-900 mb-2">
-                        <div className="font-bold text-sm text-black dark:text-white truncate">
-                          {currentUser.fullName || 'HabitPulse User'}
-                        </div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                          {currentUser.email}
-                        </div>
-                        
-                        {/* Tier Badge */}
-                        <div className="mt-2.5 flex items-center justify-between">
-                          <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-                            Storage Tier:
-                          </span>
-                          {isPremium ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
-                              <Crown className="w-2.5 h-2.5 fill-current" />
-                              {subscriptionPlan} Pro
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
-                              <HardDrive className="w-2.5 h-2.5" />
-                              Free (Local)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Upgrade Banner in Menu if Free */}
-                      {!isPremium && (
-                        <div className="p-3 mb-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-black dark:text-white">
-                            <Cloud className="w-3.5 h-3.5" />
-                            <span>Cloud Sync Anywhere</span>
-                          </div>
-                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                            Upgrade to Pro to sync habits & tasks across all your devices via Supabase.
-                          </p>
-                          <button
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              openPricingModal();
-                            }}
-                            className="w-full py-1.5 rounded-lg bg-black text-white dark:bg-white dark:text-black text-xs font-bold hover:opacity-90 transition shadow-sm"
-                          >
-                            Upgrade from ₹99
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="space-y-1">
-                        {/* Only show plan upgrade / change option if user is NOT on Lifetime */}
-                        {subscriptionPlan !== 'lifetime' && (
-                          <button
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              openPricingModal();
-                            }}
-                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Crown className="w-3.5 h-3.5 text-black dark:text-white" />
-                              <span>{isPremium ? 'Change Subscription' : 'Upgrade to Pro'}</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-zinc-400">Razorpay</span>
-                          </button>
-                        )}
-
-                        {/* Sound Toggle for Mobile */}
-                        <button
-                          onClick={() => {
-                            toggleSound();
-                          }}
-                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
-                        >
-                          <div className="flex items-center gap-2">
-                            {user.soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-black dark:text-white" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-400" />}
-                            <span>Sound Effects</span>
-                          </div>
-                          <span className="text-[10px] font-bold text-zinc-400">
-                            {user.soundEnabled ? 'ON' : 'OFF'}
-                          </span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            setIsBackupModalOpen(true);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
-                        >
-                          <Download className="w-3.5 h-3.5 text-black dark:text-white" />
-                          <span>Backup & Restore</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            setIsResetModalOpen(true);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5 text-black dark:text-white" />
-                          <span>Reset Full System</span>
-                        </button>
-
-                        <div className="my-1 border-t border-zinc-100 dark:border-zinc-900" />
-
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            logout();
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>Sign Out</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+              {/* Clerk Auth Controls */}
+              <Show when="signed-out">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <SignInButton mode="modal">
+                    <button className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95 shrink-0">
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>Sign In</span>
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-black text-white dark:bg-white dark:text-black hover:opacity-85 transition active:scale-95 shrink-0">
+                      <span>Sign Up</span>
+                    </button>
+                  </SignUpButton>
                 </div>
-              )}
+              </Show>
+
+              <Show when="signed-in">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: 'w-7 h-7 sm:w-8 sm:h-8 rounded-xl ring-2 ring-zinc-200 dark:ring-zinc-800',
+                      },
+                    }}
+                  />
+                </div>
+              </Show>
 
               {/* + New Habit Button */}
               <button

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useUser, useClerk } from '@clerk/react';
 import {
   getSupabaseClient,
   isSupabaseConfigured,
@@ -49,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatus>('local_only');
 
+  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, user: clerkUser } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
+
   // Subscription Plan: stored in localStorage for fast instantaneous offline access
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(() => {
     try {
@@ -75,48 +79,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isSupabaseReady = isSupabaseConfigured();
 
-  // Initialize Auth state from Supabase
+  // Synchronize Clerk user state into AuthContext
   useEffect(() => {
-    const supabase = getSupabaseClient();
+    if (!isClerkLoaded) return;
 
-    if (!supabase) {
-      // Check offline / mock user
-      try {
-        const savedOffline = localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY);
-        if (savedOffline) {
-          const parsed = JSON.parse(savedOffline);
-          setCurrentUser(parsed);
-        }
-      } catch {
-        // ignore
+    if (isClerkSignedIn && clerkUser) {
+      const email = clerkUser.primaryEmailAddress?.emailAddress || '';
+      const fullName = clerkUser.fullName || clerkUser.username || email.split('@')[0] || 'User';
+      const avatarUrl = clerkUser.imageUrl;
+
+      const authUser: AuthUser = {
+        id: clerkUser.id,
+        email,
+        fullName,
+        avatarUrl,
+        isPremium,
+        subscriptionPlan,
+      };
+
+      setCurrentUser(authUser);
+      if (isPremium) {
+        setCloudSyncStatus('synced');
       }
       setIsLoading(false);
-      setCloudSyncStatus(isPremium ? 'error' : 'local_only');
-      return;
-    }
-
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const authUser: AuthUser = {
-          id: session.user.id,
-          email: session.user.email || '',
-          fullName: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
-          avatarUrl: session.user.user_metadata?.avatar_url,
-          isPremium,
-          subscriptionPlan,
-        };
-        setCurrentUser(authUser);
-        if (isPremium) {
-          setCloudSyncStatus('synced');
+    } else {
+      // Fallback: check Supabase session
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        try {
+          const savedOffline = localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY);
+          if (savedOffline) {
+            setCurrentUser(JSON.parse(savedOffline));
+          } else {
+            setCurrentUser(null);
+          }
+        } catch {
+          setCurrentUser(null);
         }
+        setIsLoading(false);
+        setCloudSyncStatus(isPremium ? 'error' : 'local_only');
+        return;
       }
-      setIsLoading(false);
-    });
 
-    // Listen to auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           const authUser: AuthUser = {
             id: session.user.id,
@@ -127,23 +132,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subscriptionPlan,
           };
           setCurrentUser(authUser);
-
-          // Check if user has subscription in cloud profiles table
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('is_premium, subscription_plan')
-              .eq('id', session.user.id)
-              .maybeSingle();
-
-            if (profile?.is_premium && profile.subscription_plan) {
-              setSubscriptionPlan(profile.subscription_plan as SubscriptionPlan);
-              localStorage.setItem(LOCAL_STORAGE_SUB_KEY, profile.subscription_plan);
-            }
-          } catch (e) {
-            console.warn('Could not fetch cloud profile:', e);
-          }
-
           if (isPremium) {
             setCloudSyncStatus('synced');
           }
@@ -152,13 +140,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setCloudSyncStatus('local_only');
         }
         setIsLoading(false);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [isPremium, subscriptionPlan]);
+      });
+    }
+  }, [isClerkLoaded, isClerkSignedIn, clerkUser, isPremium, subscriptionPlan]);
 
   // Login with Email & Password
   const loginWithEmail = async (email: string, pass: string): Promise<{ error?: string }> => {
@@ -281,6 +265,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Logout
   const logout = async () => {
+    try {
+      await clerkSignOut();
+    } catch (e) {
+      console.warn('Clerk signOut warning:', e);
+    }
     const supabase = getSupabaseClient();
     if (supabase) {
       try {
