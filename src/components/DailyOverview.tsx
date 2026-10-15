@@ -72,37 +72,39 @@ export const DailyOverview: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Date Switcher & Search Bar */}
-      <div className="card-neo rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="card-neo rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         
         {/* Date Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => changeDate(-1)}
-            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition"
-            title="Previous Day"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => changeDate(-1)}
+              className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition shrink-0"
+              title="Previous Day"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-          <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            <CalendarIcon className="w-4 h-4 text-black dark:text-white" />
-            <span className="font-bold text-sm sm:text-base text-black dark:text-white tracking-tight">
-              {formatDisplayDate(selectedDate)}
-            </span>
+            <div className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm shrink-0">
+              <CalendarIcon className="w-4 h-4 text-black dark:text-white shrink-0" />
+              <span className="font-bold text-xs sm:text-base text-black dark:text-white tracking-tight whitespace-nowrap">
+                {formatDisplayDate(selectedDate)}
+              </span>
+            </div>
+
+            <button
+              onClick={() => changeDate(1)}
+              className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition shrink-0"
+              title="Next Day"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
-
-          <button
-            onClick={() => changeDate(1)}
-            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-black dark:text-white transition"
-            title="Next Day"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
 
           {!isToday && (
             <button
               onClick={() => setSelectedDate(getTodayKey())}
-              className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-bold text-xs hover:opacity-85 transition shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-bold text-xs hover:opacity-85 transition shadow-sm shrink-0"
             >
               Today
             </button>
@@ -110,7 +112,7 @@ export const DailyOverview: React.FC = () => {
         </div>
 
         {/* Search Input */}
-        <div className="relative flex-1 max-w-xs">
+        <div className="relative w-full sm:flex-1 sm:max-w-xs">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -187,12 +189,12 @@ export const DailyOverview: React.FC = () => {
       {/* Filter Tabs: Time of Day & Categories */}
       <div className="space-y-3">
         {/* Time of Day Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           {timeFilters.map((tf) => (
             <button
               key={tf.id}
               onClick={() => setFilterTimeOfDay(tf.id)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 shrink-0 ${
                 filterTimeOfDay === tf.id
                   ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
                   : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white border border-zinc-200 dark:border-zinc-800'
@@ -205,13 +207,13 @@ export const DailyOverview: React.FC = () => {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           <Filter className="w-3.5 h-3.5 text-zinc-400 shrink-0 mr-1" />
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setFilterCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 shrink-0 ${
                 filterCategory === cat.id
                   ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
                   : 'bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white border border-zinc-200 dark:border-zinc-800'

@@ -103,18 +103,18 @@ export const Header: React.FC = () => {
           <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
             
             {/* Logo & Brand */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105 shrink-0">
-                <Sparkles className="w-5 h-5 stroke-[2.5]" />
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105 shrink-0">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-lg sm:text-xl tracking-tight text-black dark:text-white">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="font-extrabold text-base sm:text-xl tracking-tight text-black dark:text-white">
                     HabitPulse
                   </span>
                   {isPremium ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
-                      <Crown className="w-3 h-3 fill-current" />
+                    <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] uppercase font-black tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
+                      <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
                       <span>Pro</span>
                     </span>
                   ) : (
@@ -162,7 +162,7 @@ export const Header: React.FC = () => {
             </div>
 
             {/* Right Side: Storage/Cloud Status, Quick Utilities, Auth & Actions */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
 
               {/* Cloud Sync Status Indicator */}
               {isPremium ? (
@@ -209,11 +209,11 @@ export const Header: React.FC = () => {
                 </button>
               )}
 
-              {/* Sound Toggle */}
+              {/* Sound Toggle (hidden on mobile, accessible in user menu) */}
               <button
                 onClick={toggleSound}
                 title={user.soundEnabled ? 'Disable Sounds' : 'Enable Sounds'}
-                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
+                className="hidden sm:flex p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
               >
                 {user.soundEnabled ? <Volume2 className="w-4 h-4 text-black dark:text-white" /> : <VolumeX className="w-4 h-4 text-zinc-400" />}
               </button>
@@ -222,7 +222,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={toggleTheme}
                 title={user.darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
+                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition shrink-0"
               >
                 {user.darkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
               </button>
@@ -249,16 +249,17 @@ export const Header: React.FC = () => {
               {!currentUser ? (
                 <button
                   onClick={openAuthModal}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95 shrink-0"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
                 </button>
               ) : (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative shrink-0" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition"
+                    aria-label="User menu"
+                    className="flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition shrink-0"
                   >
                     {currentUser.avatarUrl ? (
                       <img
@@ -274,7 +275,7 @@ export const Header: React.FC = () => {
                     <span className="hidden sm:inline text-xs font-bold text-black dark:text-white max-w-[90px] truncate">
                       {currentUser.fullName || currentUser.email.split('@')[0]}
                     </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                    <ChevronDown className="hidden sm:inline w-3.5 h-3.5 text-zinc-500" />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -349,6 +350,22 @@ export const Header: React.FC = () => {
                           </button>
                         )}
 
+                        {/* Sound Toggle for Mobile */}
+                        <button
+                          onClick={() => {
+                            toggleSound();
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
+                        >
+                          <div className="flex items-center gap-2">
+                            {user.soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-black dark:text-white" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-400" />}
+                            <span>Sound Effects</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-zinc-400">
+                            {user.soundEnabled ? 'ON' : 'OFF'}
+                          </span>
+                        </button>
+
                         <button
                           onClick={() => {
                             setIsUserMenuOpen(false);
@@ -392,16 +409,17 @@ export const Header: React.FC = () => {
               {/* + New Habit Button */}
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-sm active:scale-95 transition-all duration-150"
+                aria-label="New Habit"
+                className="flex items-center justify-center p-2 sm:px-4 sm:py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-sm active:scale-95 transition-all duration-150 shrink-0"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
-                <span className="hidden sm:inline">New Habit</span>
+                <span className="hidden sm:inline sm:ml-1.5">New Habit</span>
               </button>
             </div>
           </div>
 
           {/* Navigation Bar Tabs */}
-          <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800">
+          <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800 -mx-4 px-4 sm:mx-0 sm:px-0">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;

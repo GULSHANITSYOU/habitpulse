@@ -67,20 +67,20 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-zinc-100 dark:bg-black text-black dark:text-white transition-colors selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-28 sm:pb-12">
         {activeTab === 'today' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
             <DailyOverview />
 
             {/* Habit Cards Grid */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight whitespace-nowrap">
                     Daily Rituals ({sortedScheduledHabits.length})
                   </h3>
                   {sortedScheduledHabits.length > 0 && (
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <span className="hidden sm:inline text-xs text-zinc-500 dark:text-zinc-400 truncate">
                       • Tap to complete or track progress
                     </span>
                   )}
@@ -88,7 +88,7 @@ const MainContent: React.FC = () => {
 
                 <button
                   onClick={() => setIsNewHabitModalOpen(true)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-black dark:text-white hover:opacity-70 transition"
+                  className="flex items-center gap-1.5 text-xs font-bold text-black dark:text-white hover:opacity-70 transition shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
                   <span>Add Habit</span>
