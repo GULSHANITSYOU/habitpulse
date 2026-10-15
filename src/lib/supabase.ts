@@ -1,35 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Habit, HabitLog, TodoItem, UserProfile } from '../types/habit';
 
-// Default / fallback keys from Vite environment
-const ENV_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const ENV_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-const CONFIG_STORAGE_KEY_URL = 'habitpulse_supabase_url';
-const CONFIG_STORAGE_KEY_KEY = 'habitpulse_supabase_anon_key';
+const DEFAULT_SUPABASE_URL = 'https://qumpqsbmvgcvfwzpgtvz.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1bXBxc2JtdmdjdmZ3enBndHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjczODcsImV4cCI6MjEwNzY0MzM4N30.Il_4Xniq4rjcTyQMNSG3FdqUHQLRhbd66vnl_rsZKcQ';
 
 export function getSupabaseCredentials(): { url: string; anonKey: string } {
-  const customUrl = localStorage.getItem(CONFIG_STORAGE_KEY_URL);
-  const customKey = localStorage.getItem(CONFIG_STORAGE_KEY_KEY);
-
-  const url = customUrl || ENV_SUPABASE_URL;
-  const anonKey = customKey || ENV_SUPABASE_ANON_KEY;
-
+  const url = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
   return { url: url.trim(), anonKey: anonKey.trim() };
-}
-
-export function saveCustomSupabaseConfig(url: string, anonKey: string): void {
-  if (url.trim()) {
-    localStorage.setItem(CONFIG_STORAGE_KEY_URL, url.trim());
-  } else {
-    localStorage.removeItem(CONFIG_STORAGE_KEY_URL);
-  }
-
-  if (anonKey.trim()) {
-    localStorage.setItem(CONFIG_STORAGE_KEY_KEY, anonKey.trim());
-  } else {
-    localStorage.removeItem(CONFIG_STORAGE_KEY_KEY);
-  }
 }
 
 let cachedClient: SupabaseClient | null = null;

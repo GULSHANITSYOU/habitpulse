@@ -15,7 +15,6 @@ import { HabitModal } from './components/HabitModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { AuthModal } from './components/AuthModal';
 import { PricingModal } from './components/PricingModal';
-import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 
 const MainContent: React.FC = () => {
   const {
@@ -201,7 +200,6 @@ const MainContent: React.FC = () => {
       {/* Supabase & Razorpay Modals */}
       <AuthModal />
       <PricingModal />
-      <SupabaseConfigModal />
     </div>
   );
 };

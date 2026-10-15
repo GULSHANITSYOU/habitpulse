@@ -51,19 +51,10 @@ export const PREMIUM_PLANS: PremiumPlanInfo[] = [
   },
 ];
 
-const CONFIG_STORAGE_KEY_RAZORPAY = 'habitpulse_razorpay_key_id';
+const DEFAULT_RAZORPAY_KEY = 'rzp_test_To5AFOGcAyxM97';
 
 export function getRazorpayKey(): string {
-  const customKey = localStorage.getItem(CONFIG_STORAGE_KEY_RAZORPAY);
-  return (customKey || import.meta.env.VITE_RAZORPAY_KEY_ID || '').trim();
-}
-
-export function saveCustomRazorpayKey(key: string): void {
-  if (key.trim()) {
-    localStorage.setItem(CONFIG_STORAGE_KEY_RAZORPAY, key.trim());
-  } else {
-    localStorage.removeItem(CONFIG_STORAGE_KEY_RAZORPAY);
-  }
+  return (import.meta.env.VITE_RAZORPAY_KEY_ID || DEFAULT_RAZORPAY_KEY).trim();
 }
 
 /**

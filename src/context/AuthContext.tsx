@@ -25,9 +25,6 @@ interface AuthContextType {
   isPricingModalOpen: boolean;
   openPricingModal: () => void;
   closePricingModal: () => void;
-  isConfigModalOpen: boolean;
-  openConfigModal: () => void;
-  closeConfigModal: () => void;
 
   // Auth Actions
   loginWithEmail: (email: string, pass: string) => Promise<{ error?: string }>;
@@ -70,14 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Modal open states
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
   const openPricingModal = () => setIsPricingModalOpen(true);
   const closePricingModal = () => setIsPricingModalOpen(false);
-  const openConfigModal = () => setIsConfigModalOpen(true);
-  const closeConfigModal = () => setIsConfigModalOpen(false);
 
   const isSupabaseReady = isSupabaseConfigured();
 
@@ -401,9 +395,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPricingModalOpen,
         openPricingModal,
         closePricingModal,
-        isConfigModalOpen,
-        openConfigModal,
-        closeConfigModal,
         loginWithEmail,
         signupWithEmail,
         loginWithGoogle,

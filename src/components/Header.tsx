@@ -23,7 +23,6 @@ import {
   ChevronDown,
   RefreshCw,
   AlertCircle,
-  Database,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { useAuth } from '../context/AuthContext';
@@ -51,7 +50,6 @@ export const Header: React.FC = () => {
     cloudSyncStatus,
     openAuthModal,
     openPricingModal,
-    openConfigModal,
     logout,
   } = useAuth();
 
@@ -178,13 +176,10 @@ export const Header: React.FC = () => {
                       <span className="text-[11px]">Syncing...</span>
                     </>
                   ) : cloudSyncStatus === 'error' ? (
-                    <button
-                      onClick={openConfigModal}
-                      className="flex items-center gap-1 text-red-500 hover:underline"
-                    >
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      <span className="text-[11px]">Sync Setup</span>
-                    </button>
+                    <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
+                      <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
+                      <span className="text-[11px]">Syncing</span>
+                    </div>
                   ) : (
                     <>
                       <Cloud className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
@@ -349,17 +344,6 @@ export const Header: React.FC = () => {
                             <span>{isPremium ? 'Change Subscription' : 'Upgrade to Pro'}</span>
                           </div>
                           <span className="text-[10px] font-bold text-zinc-400">Razorpay</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            openConfigModal();
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
-                        >
-                          <Database className="w-3.5 h-3.5 text-black dark:text-white" />
-                          <span>Supabase Database Settings</span>
                         </button>
 
                         <button

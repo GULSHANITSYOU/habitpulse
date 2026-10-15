@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
-import { PREMIUM_PLANS, initiateRazorpayPayment, getRazorpayKey } from '../lib/razorpay';
+import { PREMIUM_PLANS, initiateRazorpayPayment } from '../lib/razorpay';
 import type { PremiumPlanInfo } from '../types/auth';
 
 export const PricingModal: React.FC = () => {
@@ -21,7 +21,6 @@ export const PricingModal: React.FC = () => {
     upgradeSubscription,
     currentUser,
     openAuthModal,
-    openConfigModal,
   } = useAuth();
 
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
@@ -81,8 +80,6 @@ export const PricingModal: React.FC = () => {
       },
     });
   };
-
-  const hasRazorpayKey = Boolean(getRazorpayKey());
 
   return (
     <div
@@ -258,18 +255,6 @@ export const PricingModal: React.FC = () => {
               <ShieldCheck className="w-4 h-4 text-black dark:text-white" />
               <span>Secured by 256-bit encrypted Razorpay Checkout & Supabase Database.</span>
             </div>
-
-            {!hasRazorpayKey && (
-              <button
-                onClick={() => {
-                  closePricingModal();
-                  openConfigModal();
-                }}
-                className="text-[11px] underline font-semibold text-zinc-400 hover:text-black dark:hover:text-white"
-              >
-                Configure Custom Razorpay Key ID
-              </button>
-            )}
           </div>
         </div>
       </div>

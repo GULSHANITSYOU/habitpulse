@@ -9,8 +9,6 @@ export const AuthModal: React.FC = () => {
     loginWithEmail,
     signupWithEmail,
     loginWithGoogle,
-    isSupabaseReady,
-    openConfigModal,
   } = useAuth();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -259,21 +257,6 @@ export const AuthModal: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {!isSupabaseReady && (
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  closeAuthModal();
-                  openConfigModal();
-                }}
-                className="text-[11px] text-zinc-500 hover:text-black dark:hover:text-white underline"
-              >
-                Configure Supabase Connection Credentials
-              </button>
-            </div>
-          )}
 
           <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 text-center">
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
