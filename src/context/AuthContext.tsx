@@ -240,6 +240,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
+        if (!data.session) {
+          return {
+            error: 'Account registered! Please check your email inbox to confirm, or turn OFF "Confirm email" in Supabase (Auth -> Providers -> Email) to sign in instantly.',
+          };
+        }
         setCurrentUser({
           id: data.user.id,
           email: data.user.email || '',

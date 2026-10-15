@@ -185,6 +185,9 @@ export const AuthModal: React.FC = () => {
             </svg>
             <span>Continue with Google</span>
           </button>
+          <p className="text-[10px] text-zinc-400 text-center -mt-2">
+            💡 <strong>Email & Password</strong> sign-in below works immediately!
+          </p>
 
           <div className="relative flex items-center justify-center">
             <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
