@@ -227,7 +227,11 @@ export const PricingModal: React.FC = () => {
                   <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                     {isCurrent ? (
                       <div className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white text-xs font-bold text-center border border-zinc-200 dark:border-zinc-700">
-                        Current Active Plan
+                        {plan.id === 'lifetime' ? 'Lifetime Unlocked Forever' : 'Current Active Plan'}
+                      </div>
+                    ) : subscriptionPlan === 'lifetime' ? (
+                      <div className="w-full py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 text-xs font-semibold text-center border border-zinc-200 dark:border-zinc-800">
+                        Included in Lifetime
                       </div>
                     ) : (
                       <button

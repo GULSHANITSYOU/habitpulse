@@ -332,19 +332,22 @@ export const Header: React.FC = () => {
 
                       {/* Actions */}
                       <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            openPricingModal();
-                          }}
-                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Crown className="w-3.5 h-3.5 text-black dark:text-white" />
-                            <span>{isPremium ? 'Change Subscription' : 'Upgrade to Pro'}</span>
-                          </div>
-                          <span className="text-[10px] font-bold text-zinc-400">Razorpay</span>
-                        </button>
+                        {/* Only show plan upgrade / change option if user is NOT on Lifetime */}
+                        {subscriptionPlan !== 'lifetime' && (
+                          <button
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openPricingModal();
+                            }}
+                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Crown className="w-3.5 h-3.5 text-black dark:text-white" />
+                              <span>{isPremium ? 'Change Subscription' : 'Upgrade to Pro'}</span>
+                            </div>
+                            <span className="text-[10px] font-bold text-zinc-400">Razorpay</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => {
