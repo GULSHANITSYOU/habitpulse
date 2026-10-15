@@ -1,4 +1,5 @@
 import React from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { HabitProvider, useHabits } from './context/HabitContext';
 import { Header } from './components/Header';
 import { DailyOverview } from './components/DailyOverview';
@@ -9,9 +10,12 @@ import { AnalyticsView } from './components/AnalyticsView';
 import { ManageHabitsView } from './components/ManageHabitsView';
 import { TodosView } from './components/TodosView';
 import { parseDateKey, isHabitScheduledForDate } from './utils/dateUtils';
-import { Plus, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Plus, Sparkles, CheckCircle2, Cloud, HardDrive } from 'lucide-react';
 import { HabitModal } from './components/HabitModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { AuthModal } from './components/AuthModal';
+import { PricingModal } from './components/PricingModal';
+import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 
 const MainContent: React.FC = () => {
   const {
@@ -26,6 +30,8 @@ const MainContent: React.FC = () => {
     confirmDeleteHabit,
     cancelDeleteHabit,
   } = useHabits();
+
+  const { isPremium } = useAuth();
 
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = React.useState(false);
 
@@ -160,7 +166,19 @@ const MainContent: React.FC = () => {
             <CheckCircle2 className="w-3.5 h-3.5 text-black dark:text-white" />
             <span className="font-medium text-zinc-700 dark:text-zinc-300">HabitPulse — Minimalist & High-Consistency Daily Rituals</span>
           </div>
-          <span>Offline-first • Stored securely in your browser</span>
+          <div className="flex items-center gap-1.5">
+            {isPremium ? (
+              <>
+                <Cloud className="w-3.5 h-3.5 text-black dark:text-white" />
+                <span>Pro Tier • Stored online in Supabase Database</span>
+              </>
+            ) : (
+              <>
+                <HardDrive className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Free Tier • Stored locally in your browser</span>
+              </>
+            )}
+          </div>
         </div>
       </footer>
 
@@ -179,15 +197,22 @@ const MainContent: React.FC = () => {
           onCancel={cancelDeleteHabit}
         />
       )}
+
+      {/* Supabase & Razorpay Modals */}
+      <AuthModal />
+      <PricingModal />
+      <SupabaseConfigModal />
     </div>
   );
 };
 
 export function App() {
   return (
-    <HabitProvider>
-      <MainContent />
-    </HabitProvider>
+    <AuthProvider>
+      <HabitProvider>
+        <MainContent />
+      </HabitProvider>
+    </AuthProvider>
   );
 }
 

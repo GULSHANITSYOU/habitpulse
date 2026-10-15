@@ -48,12 +48,17 @@ export interface HabitLog {
 }
 
 export interface UserProfile {
+  id?: string;
+  email?: string;
   name: string;
   xp: number;
   level: number;
   soundEnabled: boolean;
   darkMode: boolean;
   skipDeleteConfirm?: boolean;
+  isPremium?: boolean;
+  subscriptionPlan?: 'free' | 'monthly' | 'yearly' | 'lifetime';
+  subscriptionExpiresAt?: string;
 }
 
 export interface HabitStats {

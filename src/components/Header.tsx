@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   Volume2,
@@ -15,8 +15,18 @@ import {
   Award,
   RotateCcw,
   CheckSquare,
+  LogIn,
+  LogOut,
+  Cloud,
+  HardDrive,
+  Crown,
+  ChevronDown,
+  RefreshCw,
+  AlertCircle,
+  Database,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
+import { useAuth } from '../context/AuthContext';
 import { HabitModal } from './HabitModal';
 import { ExportImportModal } from './ExportImportModal';
 import { ResetSystemModal } from './ResetSystemModal';
@@ -34,9 +44,34 @@ export const Header: React.FC = () => {
     resetFullSystem,
   } = useHabits();
 
+  const {
+    currentUser,
+    isPremium,
+    subscriptionPlan,
+    cloudSyncStatus,
+    openAuthModal,
+    openPricingModal,
+    openConfigModal,
+    logout,
+  } = useAuth();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const activeHabits = habits.filter((h) => !h.archived);
   const activeTodosCount = todos.filter((t) => !t.completed).length;
@@ -67,11 +102,11 @@ export const Header: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-black/95 border-b border-zinc-200 dark:border-zinc-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
             
             {/* Logo & Brand */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105">
+              <div className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105 shrink-0">
                 <Sparkles className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
@@ -79,16 +114,27 @@ export const Header: React.FC = () => {
                   <span className="font-extrabold text-lg sm:text-xl tracking-tight text-black dark:text-white">
                     HabitPulse
                   </span>
-                  <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800">
-                    Pro
-                  </span>
+                  {isPremium ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
+                      <Crown className="w-3 h-3 fill-current" />
+                      <span>Pro</span>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={openPricingModal}
+                      className="hidden sm:inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-white transition"
+                    >
+                      <span>Free</span>
+                      <span className="text-[9px] opacity-70">• Upgrade</span>
+                    </button>
+                  )}
                 </div>
                 <p className="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400 font-medium">Neat & Focused Daily Routine</p>
               </div>
             </div>
 
             {/* Level & Streaks Minimal Pill */}
-            <div className="hidden md:flex items-center gap-4 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-1.5 shadow-sm">
+            <div className="hidden lg:flex items-center gap-4 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-1.5 shadow-sm">
               {/* Level & XP */}
               <div className="flex items-center gap-2.5">
                 <div className="w-6 h-6 rounded-lg bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-black dark:text-white">
@@ -117,8 +163,57 @@ export const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Actions & Utilities */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Right Side: Storage/Cloud Status, Quick Utilities, Auth & Actions */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+
+              {/* Cloud Sync Status Indicator */}
+              {isPremium ? (
+                <div
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white"
+                  title="Your data is synchronized with your Supabase database in the cloud"
+                >
+                  {cloudSyncStatus === 'syncing' ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-zinc-500 dark:text-zinc-400" />
+                      <span className="text-[11px]">Syncing...</span>
+                    </>
+                  ) : cloudSyncStatus === 'error' ? (
+                    <button
+                      onClick={openConfigModal}
+                      className="flex items-center gap-1 text-red-500 hover:underline"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      <span className="text-[11px]">Sync Setup</span>
+                    </button>
+                  ) : (
+                    <>
+                      <Cloud className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
+                      <span className="text-[11px]">Cloud Synced</span>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={openPricingModal}
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-white transition"
+                  title="Stored in browser. Upgrade to cloud sync to access across devices."
+                >
+                  <HardDrive className="w-3.5 h-3.5" />
+                  <span className="text-[11px]">Local Storage</span>
+                </button>
+              )}
+
+              {/* Upgrade to Pro Button (if not already premium) */}
+              {!isPremium && (
+                <button
+                  onClick={openPricingModal}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-bold hover:opacity-85 transition active:scale-95 shadow-sm"
+                >
+                  <Crown className="w-3.5 h-3.5 fill-current" />
+                  <span>Pro</span>
+                </button>
+              )}
+
               {/* Sound Toggle */}
               <button
                 onClick={toggleSound}
@@ -141,7 +236,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsBackupModalOpen(true)}
                 title="Backup & Restore Data"
-                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
+                className="hidden sm:flex p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -150,15 +245,167 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsResetModalOpen(true)}
                 title="Reset Full System & Restart"
-                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
+                className="hidden sm:flex p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
 
+              {/* User Authentication / Profile Dropdown */}
+              {!currentUser ? (
+                <button
+                  onClick={openAuthModal}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+              ) : (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition"
+                  >
+                    {currentUser.avatarUrl ? (
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt="User"
+                        className="w-6 h-6 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-lg bg-black text-white dark:bg-white dark:text-black text-[11px] font-bold flex items-center justify-center uppercase">
+                        {(currentUser.fullName || currentUser.email || 'U')[0]}
+                      </div>
+                    )}
+                    <span className="hidden sm:inline text-xs font-bold text-black dark:text-white max-w-[90px] truncate">
+                      {currentUser.fullName || currentUser.email.split('@')[0]}
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      {/* User Info Header */}
+                      <div className="p-2 border-b border-zinc-100 dark:border-zinc-900 mb-2">
+                        <div className="font-bold text-sm text-black dark:text-white truncate">
+                          {currentUser.fullName || 'HabitPulse User'}
+                        </div>
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                          {currentUser.email}
+                        </div>
+                        
+                        {/* Tier Badge */}
+                        <div className="mt-2.5 flex items-center justify-between">
+                          <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                            Storage Tier:
+                          </span>
+                          {isPremium ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
+                              <Crown className="w-2.5 h-2.5 fill-current" />
+                              {subscriptionPlan} Pro
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
+                              <HardDrive className="w-2.5 h-2.5" />
+                              Free (Local)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Upgrade Banner in Menu if Free */}
+                      {!isPremium && (
+                        <div className="p-3 mb-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-black dark:text-white">
+                            <Cloud className="w-3.5 h-3.5" />
+                            <span>Cloud Sync Anywhere</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Upgrade to Pro to sync habits & tasks across all your devices via Supabase.
+                          </p>
+                          <button
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              openPricingModal();
+                            }}
+                            className="w-full py-1.5 rounded-lg bg-black text-white dark:bg-white dark:text-black text-xs font-bold hover:opacity-90 transition shadow-sm"
+                          >
+                            Upgrade from ₹99
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            openPricingModal();
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Crown className="w-3.5 h-3.5 text-black dark:text-white" />
+                            <span>{isPremium ? 'Change Subscription' : 'Upgrade to Pro'}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-zinc-400">Razorpay</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            openConfigModal();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
+                        >
+                          <Database className="w-3.5 h-3.5 text-black dark:text-white" />
+                          <span>Supabase Database Settings</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setIsBackupModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
+                        >
+                          <Download className="w-3.5 h-3.5 text-black dark:text-white" />
+                          <span>Backup & Restore</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setIsResetModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition sm:hidden"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5 text-black dark:text-white" />
+                          <span>Reset Full System</span>
+                        </button>
+
+                        <div className="my-1 border-t border-zinc-100 dark:border-zinc-900" />
+
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            logout();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* + New Habit Button */}
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 sm:px-4 sm:py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-sm active:scale-95 transition-all duration-150"
+                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl font-bold text-xs sm:text-sm shadow-sm active:scale-95 transition-all duration-150"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span className="hidden sm:inline">New Habit</span>

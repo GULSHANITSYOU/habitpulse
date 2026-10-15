@@ -21,6 +21,7 @@ import {
   calculateCompletionRate,
 } from '../utils/dateUtils';
 import { soundFx } from '../utils/audio';
+import { useAuth } from './AuthContext';
 
 interface HabitContextType {
   habits: Habit[];
@@ -96,6 +97,38 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [filterTimeOfDay, setFilterTimeOfDay] = useState<TimeOfDay | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Auth & Cloud Sync
+  const {
+    currentUser,
+    isPremium,
+    syncCurrentDataToCloud,
+    loadCloudDataIntoApp,
+  } = useAuth();
+
+  const isCloudInitialLoaded = React.useRef(false);
+
+  // If user is premium and logged in, load cloud data on mount or when user changes
+  useEffect(() => {
+    let isMounted = true;
+    if (currentUser && isPremium) {
+      loadCloudDataIntoApp().then((cloudData) => {
+        if (!isMounted) return;
+        if (cloudData) {
+          if (Array.isArray(cloudData.habits)) setHabits(cloudData.habits);
+          if (Array.isArray(cloudData.logs)) setLogs(cloudData.logs);
+          if (Array.isArray(cloudData.todos)) setTodos(cloudData.todos);
+          if (cloudData.user) setUser((prev) => ({ ...prev, ...cloudData.user }));
+        }
+        isCloudInitialLoaded.current = true;
+      });
+    } else {
+      isCloudInitialLoaded.current = true;
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id, isPremium, loadCloudDataIntoApp]);
+
   // Persist habits on change
   useEffect(() => {
     saveHabitsToStorage(habits);
@@ -122,6 +155,18 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       document.documentElement.classList.add('light');
     }
   }, [user]);
+
+  // Whenever data changes, sync to Supabase Cloud if user is premium & logged in
+  useEffect(() => {
+    if (isPremium && currentUser && isCloudInitialLoaded.current) {
+      syncCurrentDataToCloud({
+        habits,
+        logs,
+        todos,
+        user,
+      });
+    }
+  }, [habits, logs, todos, user, isPremium, currentUser, syncCurrentDataToCloud]);
 
   // Confetti helper
   const triggerConfetti = useCallback(() => {
