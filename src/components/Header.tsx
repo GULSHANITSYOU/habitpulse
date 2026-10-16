@@ -44,6 +44,7 @@ export const Header: React.FC = () => {
 
   const {
     isPremium,
+    isLifetime,
     cloudSyncStatus,
     openPricingModal,
   } = useAuth();
@@ -80,20 +81,25 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-black/95 border-b border-zinc-200 dark:border-zinc-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-20 gap-2 sm:gap-4">
             
             {/* Logo & Brand */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105 shrink-0">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black shadow-sm transition-transform hover:scale-105 shrink-0">
+                <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-extrabold text-base sm:text-xl tracking-tight text-black dark:text-white">
+                  <span className="font-extrabold text-sm sm:text-xl tracking-tight text-black dark:text-white">
                     HabitPulse
                   </span>
-                  {isPremium ? (
+                  {isLifetime ? (
+                    <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] uppercase font-black tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
+                      <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+                      <span>Lifetime</span>
+                    </span>
+                  ) : isPremium ? (
                     <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] uppercase font-black tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black">
                       <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
                       <span>Pro</span>
@@ -112,7 +118,7 @@ export const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Level & Streaks Minimal Pill */}
+            {/* Level & Streaks Minimal Pill (Desktop) */}
             <div className="hidden lg:flex items-center gap-4 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-1.5 shadow-sm">
               {/* Level & XP */}
               <div className="flex items-center gap-2.5">
@@ -164,7 +170,7 @@ export const Header: React.FC = () => {
                   ) : (
                     <>
                       <Cloud className="w-3.5 h-3.5 fill-black text-black dark:fill-white dark:text-white" />
-                      <span className="text-[11px]">Cloud Synced</span>
+                      <span className="text-[11px]">{isLifetime ? 'Lifetime Cloud' : 'Cloud Synced'}</span>
                     </>
                   )}
                 </div>
@@ -179,8 +185,8 @@ export const Header: React.FC = () => {
                 </button>
               )}
 
-              {/* Upgrade to Pro Button (if not already premium) */}
-              {!isPremium && (
+              {/* Upgrade to Pro Button (Only for free tier users) */}
+              {!isPremium && !isLifetime && (
                 <button
                   onClick={openPricingModal}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-bold hover:opacity-85 transition active:scale-95 shadow-sm"
@@ -190,7 +196,7 @@ export const Header: React.FC = () => {
                 </button>
               )}
 
-              {/* Sound Toggle (hidden on mobile, accessible in user menu) */}
+              {/* Sound Toggle (hidden on mobile) */}
               <button
                 onClick={toggleSound}
                 title={user.soundEnabled ? 'Disable Sounds' : 'Enable Sounds'}
@@ -203,7 +209,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={toggleTheme}
                 title={user.darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                className="p-2 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition shrink-0"
+                className="p-1.5 sm:p-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition shrink-0"
               >
                 {user.darkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
               </button>
@@ -228,9 +234,9 @@ export const Header: React.FC = () => {
 
               {/* Clerk Auth Controls */}
               <Show when="signed-out">
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <SignInButton mode="modal">
-                    <button className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95 shrink-0">
+                    <button className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition active:scale-95 shrink-0">
                       <LogIn className="w-3.5 h-3.5" />
                       <span>Sign In</span>
                     </button>
@@ -244,7 +250,7 @@ export const Header: React.FC = () => {
               </Show>
 
               <Show when="signed-in">
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   <UserButton
                     appearance={{
                       elements: {
@@ -268,7 +274,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Navigation Bar Tabs */}
-          <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 sm:py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800 -mx-3 px-3 sm:mx-0 sm:px-0">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -276,7 +282,7 @@ export const Header: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 ${
                     isActive
                       ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'

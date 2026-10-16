@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Habit, HabitLog, TodoItem, UserProfile } from '../types/habit';
+import type { SubscriptionPlan } from '../types/auth';
 
 const DEFAULT_SUPABASE_URL = 'https://qumpqsbmvgcvfwzpgtvz.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1bXBxc2JtdmdjdmZ3enBndHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjczODcsImV4cCI6MjEwNzY0MzM4N30.Il_4Xniq4rjcTyQMNSG3FdqUHQLRhbd66vnl_rsZKcQ';
@@ -28,9 +29,8 @@ export function getSupabaseClient(): SupabaseClient | null {
   try {
     cachedClient = createClient(url, anonKey, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
+        persistSession: false,
+        autoRefreshToken: false,
       },
     });
     lastUrl = url;
@@ -81,7 +81,6 @@ export async function uploadToSupabaseCloud(
       updated_at: new Date().toISOString(),
     };
 
-    // Upsert into user_cloud_sync table
     const { error } = await client
       .from('user_cloud_sync')
       .upsert(dataToSave, { onConflict: 'user_id' });
@@ -140,11 +139,12 @@ export async function downloadFromSupabaseCloud(
 }
 
 /**
- * Updates subscription details in Supabase profiles & sync tables
+ * Updates subscription details in Supabase profiles table
  */
 export async function saveSubscriptionToCloud(
   userId: string,
-  plan: 'monthly' | 'yearly' | 'lifetime'
+  plan: 'monthly' | 'yearly' | 'lifetime',
+  profileMeta?: { email?: string; fullName?: string; avatarUrl?: string }
 ): Promise<void> {
   const client = getSupabaseClient();
   if (!client) return;
@@ -162,6 +162,9 @@ export async function saveSubscriptionToCloud(
       .upsert(
         {
           id: userId,
+          email: profileMeta?.email || null,
+          full_name: profileMeta?.fullName || null,
+          avatar_url: profileMeta?.avatarUrl || null,
           is_premium: true,
           subscription_plan: plan,
           subscription_expires_at: expiresAt,
@@ -171,5 +174,45 @@ export async function saveSubscriptionToCloud(
       );
   } catch (e) {
     console.warn('saveSubscriptionToCloud error', e);
+  }
+}
+
+/**
+ * Fetches subscription details for a user from Supabase
+ */
+export async function fetchSubscriptionFromCloud(
+  userId: string
+): Promise<{ isPremium: boolean; plan: SubscriptionPlan } | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('profiles')
+      .select('is_premium, subscription_plan, subscription_expires_at')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Check if subscription has expired (for monthly / yearly)
+    if (data.subscription_plan === 'lifetime') {
+      return { isPremium: true, plan: 'lifetime' };
+    }
+
+    if (data.is_premium && data.subscription_expires_at) {
+      const isExpired = new Date(data.subscription_expires_at).getTime() < Date.now();
+      if (isExpired) {
+        return { isPremium: false, plan: 'free' };
+      }
+    }
+
+    return {
+      isPremium: Boolean(data.is_premium),
+      plan: (data.subscription_plan as SubscriptionPlan) || 'free',
+    };
+  } catch (e) {
+    console.warn('fetchSubscriptionFromCloud error', e);
+    return null;
   }
 }

@@ -1,20 +1,29 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HabitProvider, useHabits } from './context/HabitContext';
 import { Header } from './components/Header';
 import { DailyOverview } from './components/DailyOverview';
 import { HabitCard } from './components/HabitCard';
-import { WeeklyMatrix } from './components/WeeklyMatrix';
-import { HeatmapView } from './components/HeatmapView';
-import { AnalyticsView } from './components/AnalyticsView';
-import { ManageHabitsView } from './components/ManageHabitsView';
-import { TodosView } from './components/TodosView';
 import { parseDateKey, isHabitScheduledForDate } from './utils/dateUtils';
-import { Plus, Sparkles, CheckCircle2, Cloud, HardDrive } from 'lucide-react';
+import { Plus, Sparkles, CheckCircle2, Cloud, HardDrive, Loader2 } from 'lucide-react';
 import { HabitModal } from './components/HabitModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { AuthModal } from './components/AuthModal';
 import { PricingModal } from './components/PricingModal';
+
+// Code-split heavy secondary views for maximum initial page load speed
+const WeeklyMatrix = lazy(() => import('./components/WeeklyMatrix').then(m => ({ default: m.WeeklyMatrix })));
+const HeatmapView = lazy(() => import('./components/HeatmapView').then(m => ({ default: m.HeatmapView })));
+const AnalyticsView = lazy(() => import('./components/AnalyticsView').then(m => ({ default: m.AnalyticsView })));
+const ManageHabitsView = lazy(() => import('./components/ManageHabitsView').then(m => ({ default: m.ManageHabitsView })));
+const TodosView = lazy(() => import('./components/TodosView').then(m => ({ default: m.TodosView })));
+
+const TabLoadingFallback: React.FC = () => (
+  <div className="p-12 text-center flex flex-col items-center justify-center space-y-3 min-h-[300px]">
+    <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+    <span className="text-xs text-zinc-500 font-medium">Loading view...</span>
+  </div>
+);
 
 const MainContent: React.FC = () => {
   const {
@@ -30,7 +39,7 @@ const MainContent: React.FC = () => {
     cancelDeleteHabit,
   } = useHabits();
 
-  const { isPremium } = useAuth();
+  const { isPremium, isLifetime } = useAuth();
 
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = React.useState(false);
 
@@ -67,13 +76,13 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-zinc-100 dark:bg-black text-black dark:text-white transition-colors selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-28 sm:pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-8 pb-24 sm:pb-12">
         {activeTab === 'today' && (
-          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-5 sm:space-y-8 animate-in fade-in duration-300">
             <DailyOverview />
 
             {/* Habit Cards Grid */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight whitespace-nowrap">
@@ -96,7 +105,7 @@ const MainContent: React.FC = () => {
               </div>
 
               {sortedScheduledHabits.length === 0 ? (
-                <div className="p-12 rounded-2xl card-neo text-center space-y-4">
+                <div className="p-8 sm:p-12 rounded-2xl card-neo text-center space-y-4">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white flex items-center justify-center border border-zinc-200 dark:border-zinc-800">
                     <Sparkles className="w-6 h-6" />
                   </div>
@@ -117,7 +126,7 @@ const MainContent: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
                   {sortedScheduledHabits.map((habit) => (
                     <HabitCard key={habit.id} habit={habit} dateKey={selectedDate} />
                   ))}
@@ -127,35 +136,37 @@ const MainContent: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'weekly' && (
-          <div className="animate-in fade-in duration-300">
-            <WeeklyMatrix />
-          </div>
-        )}
+        <Suspense fallback={<TabLoadingFallback />}>
+          {activeTab === 'weekly' && (
+            <div className="animate-in fade-in duration-300">
+              <WeeklyMatrix />
+            </div>
+          )}
 
-        {activeTab === 'heatmap' && (
-          <div className="animate-in fade-in duration-300">
-            <HeatmapView />
-          </div>
-        )}
+          {activeTab === 'heatmap' && (
+            <div className="animate-in fade-in duration-300">
+              <HeatmapView />
+            </div>
+          )}
 
-        {activeTab === 'todos' && (
-          <div className="animate-in fade-in duration-300">
-            <TodosView />
-          </div>
-        )}
+          {activeTab === 'todos' && (
+            <div className="animate-in fade-in duration-300">
+              <TodosView />
+            </div>
+          )}
 
-        {activeTab === 'analytics' && (
-          <div className="animate-in fade-in duration-300">
-            <AnalyticsView />
-          </div>
-        )}
+          {activeTab === 'analytics' && (
+            <div className="animate-in fade-in duration-300">
+              <AnalyticsView />
+            </div>
+          )}
 
-        {activeTab === 'manage' && (
-          <div className="animate-in fade-in duration-300">
-            <ManageHabitsView />
-          </div>
-        )}
+          {activeTab === 'manage' && (
+            <div className="animate-in fade-in duration-300">
+              <ManageHabitsView />
+            </div>
+          )}
+        </Suspense>
       </main>
 
       {/* Footer */}
@@ -166,7 +177,12 @@ const MainContent: React.FC = () => {
             <span className="font-medium text-zinc-700 dark:text-zinc-300">HabitPulse — Minimalist & High-Consistency Daily Rituals</span>
           </div>
           <div className="flex items-center gap-1.5">
-            {isPremium ? (
+            {isLifetime ? (
+              <>
+                <Cloud className="w-3.5 h-3.5 text-black dark:text-white" />
+                <span className="font-semibold text-black dark:text-white">Lifetime VIP Tier • Encrypted Supabase Cloud</span>
+              </>
+            ) : isPremium ? (
               <>
                 <Cloud className="w-3.5 h-3.5 text-black dark:text-white" />
                 <span>Pro Tier • Stored online in Supabase Database</span>
@@ -197,7 +213,7 @@ const MainContent: React.FC = () => {
         />
       )}
 
-      {/* Supabase & Razorpay Modals */}
+      {/* Modals */}
       <AuthModal />
       <PricingModal />
     </div>

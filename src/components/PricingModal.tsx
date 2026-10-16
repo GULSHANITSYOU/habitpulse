@@ -7,6 +7,8 @@ import {
   ShieldCheck,
   Star,
   CreditCard,
+  Crown,
+  Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +20,7 @@ export const PricingModal: React.FC = () => {
     isPricingModalOpen,
     closePricingModal,
     subscriptionPlan,
+    isLifetime,
     upgradeSubscription,
     currentUser,
     openAuthModal,
@@ -40,7 +43,10 @@ export const PricingModal: React.FC = () => {
   if (!isPricingModalOpen) return null;
 
   const handleSelectPlan = async (plan: PremiumPlanInfo) => {
-    // If not logged in, prompt to sign in or create account first so cloud sync associates with their account
+    // If user already owns the lifetime plan, disallow changing plans
+    if (isLifetime) return;
+
+    // If not logged in, prompt to sign in via Clerk
     if (!currentUser) {
       closePricingModal();
       openAuthModal();
@@ -90,7 +96,7 @@ export const PricingModal: React.FC = () => {
         className="w-full max-w-4xl max-h-[92vh] sm:max-h-[88vh] bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky Header with Close Button (ALWAYS 100% visible at top) */}
+        {/* Sticky Header with Close Button */}
         <div className="flex items-start justify-between p-5 sm:p-7 pb-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0 bg-white dark:bg-black z-10">
           <div className="pr-4">
             <div className="flex items-center gap-2">
@@ -100,10 +106,12 @@ export const PricingModal: React.FC = () => {
               <span className="text-xs font-semibold text-zinc-500">Multi-Device Cloud Sync</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-black dark:text-white tracking-tight mt-1.5">
-              Unlock Anywhere Access with Cloud Sync
+              {isLifetime ? 'Lifetime VIP Membership Active' : 'Unlock Anywhere Access with Cloud Sync'}
             </h2>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-xl">
-              Free users store data strictly in the browser. Upgrade with Razorpay to store your habits securely in the Supabase cloud and access them across all your phones, tablets, and computers.
+              {isLifetime
+                ? 'Your account is permanently upgraded to Lifetime Pro. You have full access to real-time Supabase cloud sync across all your devices with no recurring fees.'
+                : 'Free users store data strictly in the browser. Upgrade with Razorpay to store your habits securely in the Supabase cloud and access them across all your phones, tablets, and computers.'}
             </p>
           </div>
 
@@ -118,6 +126,26 @@ export const PricingModal: React.FC = () => {
 
         {/* Scrollable Content Body */}
         <div className="overflow-y-auto flex-1 p-5 sm:p-7 pt-4 space-y-6">
+          {/* Lifetime Banner: If user has Lifetime, show locked status and celebratory banner */}
+          {isLifetime && (
+            <div className="p-6 rounded-2xl bg-black text-white dark:bg-white dark:text-black border border-zinc-800 dark:border-zinc-200 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-zinc-800 text-white dark:bg-zinc-200 dark:text-black flex items-center justify-center shrink-0">
+                  <Crown className="w-6 h-6 fill-current" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg flex items-center gap-2">
+                    <span>Lifetime Access Unlocked</span>
+                    <Sparkles className="w-4 h-4" />
+                  </h3>
+                  <p className="text-xs opacity-90 mt-0.5">
+                    You have lifetime unlimited cloud sync and VIP features forever. No plan changes or subscription renewals are ever required.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Feedback messages */}
           {successMessage && (
             <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-black dark:border-white text-xs font-bold text-black dark:text-white flex items-center gap-2">
@@ -139,34 +167,36 @@ export const PricingModal: React.FC = () => {
           )}
 
           {/* Comparison Highlight Pill */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                <HardDrive className="w-5 h-5 text-zinc-500" />
+          {!isLifetime && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                  <HardDrive className="w-5 h-5 text-zinc-500" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-black dark:text-white">Free Plan (Browser Storage)</h4>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    Data stays on this single browser only. Clearing cache loses routine history.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-black dark:text-white">Free Plan (Browser Storage)</h4>
-                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Data stays on this single browser only. Clearing cache loses routine history.
-                </p>
-              </div>
-            </div>
 
-            <div className="p-4 rounded-2xl bg-black text-white dark:bg-white dark:text-black flex items-center gap-3 shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center shrink-0">
-                <Cloud className="w-5 h-5 text-white dark:text-black" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold flex items-center gap-1.5">
-                  <span>Pro Plan (Supabase Cloud Sync)</span>
-                  <Star className="w-3 h-3 fill-current" />
-                </h4>
-                <p className="text-[11px] opacity-80">
-                  Encrypted database cloud backup. Syncs seamlessly across every device and laptop.
-                </p>
+              <div className="p-4 rounded-2xl bg-black text-white dark:bg-white dark:text-black flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center shrink-0">
+                  <Cloud className="w-5 h-5 text-white dark:text-black" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold flex items-center gap-1.5">
+                    <span>Pro Plan (Supabase Cloud Sync)</span>
+                    <Star className="w-3 h-3 fill-current" />
+                  </h4>
+                  <p className="text-[11px] opacity-80">
+                    Encrypted database cloud backup. Syncs seamlessly across every device and laptop.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Pricing Tier Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -223,15 +253,15 @@ export const PricingModal: React.FC = () => {
                     </ul>
                   </div>
 
-                  {/* Upgrade Button */}
+                  {/* Button Section */}
                   <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                    {isCurrent ? (
-                      <div className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white text-xs font-bold text-center border border-zinc-200 dark:border-zinc-700">
-                        {plan.id === 'lifetime' ? 'Lifetime Unlocked Forever' : 'Current Active Plan'}
+                    {isLifetime ? (
+                      <div className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 text-xs font-bold text-center border border-zinc-200 dark:border-zinc-800">
+                        {plan.id === 'lifetime' ? 'Your Active Lifetime Plan' : 'Included in Lifetime'}
                       </div>
-                    ) : subscriptionPlan === 'lifetime' ? (
-                      <div className="w-full py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 text-xs font-semibold text-center border border-zinc-200 dark:border-zinc-800">
-                        Included in Lifetime
+                    ) : isCurrent ? (
+                      <div className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white text-xs font-bold text-center border border-zinc-200 dark:border-zinc-700">
+                        Current Active Plan
                       </div>
                     ) : (
                       <button
