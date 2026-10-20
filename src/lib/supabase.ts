@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Habit, HabitLog, TodoItem, UserProfile } from '../types/habit';
+import type { Habit, HabitLog, TodoItem, UserProfile, IdeaItem } from '../types/habit';
 import type { SubscriptionPlan } from '../types/auth';
 
 const DEFAULT_SUPABASE_URL = 'https://qumpqsbmvgcvfwzpgtvz.supabase.co';
@@ -55,6 +55,7 @@ export interface CloudPayload {
   habits: Habit[];
   logs: HabitLog[];
   todos: TodoItem[];
+  ideas?: IdeaItem[];
   user: UserProfile;
   updatedAt: string;
 }
@@ -77,6 +78,7 @@ export async function uploadToSupabaseCloud(
       habits: payload.habits,
       logs: payload.logs,
       todos: payload.todos,
+      ideas: payload.ideas || [],
       user_profile: payload.user,
       updated_at: new Date().toISOString(),
     };
@@ -127,6 +129,7 @@ export async function downloadFromSupabaseCloud(
       habits: Array.isArray(data.habits) ? data.habits : [],
       logs: Array.isArray(data.logs) ? data.logs : [],
       todos: Array.isArray(data.todos) ? data.todos : [],
+      ideas: Array.isArray(data.ideas) ? data.ideas : [],
       user: data.user_profile || {},
       updatedAt: data.updated_at || new Date().toISOString(),
     };

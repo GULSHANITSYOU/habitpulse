@@ -82,3 +82,15 @@ export interface TodoItem {
   createdAt: string;
   completedAt?: string;
 }
+
+export interface IdeaItem {
+  id: string;
+  title: string;
+  description: string;
+  resources: string;
+  category?: string;
+  pinned?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+

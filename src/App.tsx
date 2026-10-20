@@ -17,6 +17,7 @@ const HeatmapView = lazy(() => import('./components/HeatmapView').then(m => ({ d
 const AnalyticsView = lazy(() => import('./components/AnalyticsView').then(m => ({ default: m.AnalyticsView })));
 const ManageHabitsView = lazy(() => import('./components/ManageHabitsView').then(m => ({ default: m.ManageHabitsView })));
 const TodosView = lazy(() => import('./components/TodosView').then(m => ({ default: m.TodosView })));
+const IdeasView = lazy(() => import('./components/IdeasView').then(m => ({ default: m.IdeasView })));
 
 const TabLoadingFallback: React.FC = () => (
   <div className="p-12 text-center flex flex-col items-center justify-center space-y-3 min-h-[300px]">
@@ -152,6 +153,12 @@ const MainContent: React.FC = () => {
           {activeTab === 'todos' && (
             <div className="animate-in fade-in duration-300">
               <TodosView />
+            </div>
+          )}
+
+          {activeTab === 'ideas' && (
+            <div className="animate-in fade-in duration-300">
+              <IdeasView />
             </div>
           )}
 

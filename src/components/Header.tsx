@@ -22,6 +22,7 @@ import {
   Crown,
   RefreshCw,
   AlertCircle,
+  Lightbulb,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { useAuth } from '../context/AuthContext';
@@ -38,6 +39,7 @@ export const Header: React.FC = () => {
     toggleTheme,
     habits,
     todos,
+    ideas,
     getHabitStats,
     resetFullSystem,
   } = useHabits();
@@ -65,7 +67,7 @@ export const Header: React.FC = () => {
   const xpPercent = Math.min(100, Math.round((xpCurrentLevel / 150) * 100));
 
   const navItems: {
-    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'analytics' | 'manage';
+    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'analytics' | 'manage';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
@@ -74,6 +76,7 @@ export const Header: React.FC = () => {
     { id: 'weekly', label: 'Weekly Grid', icon: Grid },
     { id: 'heatmap', label: 'Heatmap', icon: Sparkles },
     { id: 'todos', label: 'To-Dos', icon: CheckSquare, badge: activeTodosCount > 0 ? activeTodosCount : undefined },
+    { id: 'ideas', label: 'Ideas Vault', icon: Lightbulb, badge: ideas.length > 0 ? ideas.length : undefined },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'manage', label: 'All Habits', icon: ListTodo },
   ];

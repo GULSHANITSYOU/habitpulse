@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem, IdeaItem } from '../types/habit';
 import {
   loadHabitsFromStorage,
   saveHabitsToStorage,
@@ -10,6 +10,8 @@ import {
   saveUserToStorage,
   loadTodosFromStorage,
   saveTodosToStorage,
+  loadIdeasFromStorage,
+  saveIdeasToStorage,
   getInitialSeedData,
   resetSystemStorage,
 } from '../utils/storage';
@@ -23,15 +25,18 @@ import {
 import { soundFx } from '../utils/audio';
 import { useAuth } from './AuthContext';
 
+export type ActiveTabType = 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'analytics' | 'manage';
+
 interface HabitContextType {
   habits: Habit[];
   logs: HabitLog[];
   todos: TodoItem[];
+  ideas: IdeaItem[];
   user: UserProfile;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
-  activeTab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos';
-  setActiveTab: (tab: 'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos') => void;
+  activeTab: ActiveTabType;
+  setActiveTab: (tab: ActiveTabType) => void;
   filterCategory: HabitCategory | 'all';
   setFilterCategory: (cat: HabitCategory | 'all') => void;
   filterTimeOfDay: TimeOfDay | 'all';
@@ -62,6 +67,12 @@ interface HabitContextType {
   deleteTodo: (id: string) => void;
   reorderTodos: (newTodos: TodoItem[]) => void;
   clearCompletedTodos: () => void;
+
+  // Ideas Actions
+  addIdea: (idea: Omit<IdeaItem, 'id' | 'createdAt'>) => void;
+  updateIdea: (id: string, updates: Partial<IdeaItem>) => void;
+  deleteIdea: (id: string) => void;
+  togglePinIdea: (id: string) => void;
   
   // Settings & Storage
   resetToDefaults: () => void;
@@ -89,10 +100,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [habits, setHabits] = useState<Habit[]>(() => loadHabitsFromStorage());
   const [logs, setLogs] = useState<HabitLog[]>(() => loadLogsFromStorage());
   const [todos, setTodos] = useState<TodoItem[]>(() => loadTodosFromStorage());
+  const [ideas, setIdeas] = useState<IdeaItem[]>(() => loadIdeasFromStorage());
   const [user, setUser] = useState<UserProfile>(() => loadUserFromStorage());
 
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
-  const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'heatmap' | 'analytics' | 'manage' | 'todos'>('today');
+  const [activeTab, setActiveTab] = useState<ActiveTabType>('today');
   const [filterCategory, setFilterCategory] = useState<HabitCategory | 'all'>('all');
   const [filterTimeOfDay, setFilterTimeOfDay] = useState<TimeOfDay | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -117,6 +129,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (Array.isArray(cloudData.habits)) setHabits(cloudData.habits);
           if (Array.isArray(cloudData.logs)) setLogs(cloudData.logs);
           if (Array.isArray(cloudData.todos)) setTodos(cloudData.todos);
+          if (Array.isArray(cloudData.ideas)) setIdeas(cloudData.ideas);
           if (cloudData.user) setUser((prev) => ({ ...prev, ...cloudData.user }));
         }
         isCloudInitialLoaded.current = true;
@@ -144,6 +157,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveTodosToStorage(todos);
   }, [todos]);
 
+  // Persist ideas on change
+  useEffect(() => {
+    saveIdeasToStorage(ideas);
+  }, [ideas]);
+
   // Persist user and apply dark/light class
   useEffect(() => {
     saveUserToStorage(user);
@@ -163,10 +181,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         habits,
         logs,
         todos,
+        ideas,
         user,
       });
     }
-  }, [habits, logs, todos, user, isPremium, currentUser, syncCurrentDataToCloud]);
+  }, [habits, logs, todos, ideas, user, isPremium, currentUser, syncCurrentDataToCloud]);
 
   // Confetti helper
   const triggerConfetti = useCallback(() => {
@@ -509,6 +528,42 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(user.soundEnabled);
   }, [user.soundEnabled]);
 
+  // Ideas Actions
+  const addIdea = useCallback((data: Omit<IdeaItem, 'id' | 'createdAt'>) => {
+    const newIdea: IdeaItem = {
+      ...data,
+      id: `idea-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    setIdeas((prev) => [newIdea, ...prev]);
+    soundFx.playTap(user.soundEnabled);
+    triggerConfetti();
+    addXp(20);
+  }, [user.soundEnabled, triggerConfetti, addXp]);
+
+  const updateIdea = useCallback((id: string, updates: Partial<IdeaItem>) => {
+    setIdeas((prev) =>
+      prev.map((idea) =>
+        idea.id === id ? { ...idea, ...updates, updatedAt: new Date().toISOString() } : idea
+      )
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const deleteIdea = useCallback((id: string) => {
+    setIdeas((prev) => prev.filter((idea) => idea.id !== id));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const togglePinIdea = useCallback((id: string) => {
+    setIdeas((prev) =>
+      prev.map((idea) =>
+        idea.id === id ? { ...idea, pinned: !idea.pinned } : idea
+      )
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
   // Reset all data to rich seed demo
   const resetToDefaults = useCallback(() => {
     const initial = getInitialSeedData();
@@ -516,16 +571,18 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLogs(initial.logs);
     setUser(initial.user);
     setTodos(loadTodosFromStorage());
+    setIdeas(loadIdeasFromStorage());
     soundFx.playTap(true);
   }, []);
 
-  // Reset full system: wipe all habits, all logs, all todos, reset user to Level 1 (0 XP)
+  // Reset full system: wipe all habits, all logs, all todos, all ideas, reset user to Level 1 (0 XP)
   const resetFullSystem = useCallback(() => {
     const resetResult = resetSystemStorage(true);
     setHabits(resetResult.habits);
     setLogs(resetResult.logs);
     setUser(resetResult.user);
     setTodos([]);
+    setIdeas([]);
     setSelectedDate(getTodayKey());
     setActiveTab('today');
     soundFx.playTap(true);
@@ -539,10 +596,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       habits,
       logs,
       todos,
+      ideas,
       user,
     };
     return JSON.stringify(data, null, 2);
-  }, [habits, logs, todos, user]);
+  }, [habits, logs, todos, ideas, user]);
 
   // Import JSON
   const importData = useCallback((jsonStr: string): boolean => {
@@ -556,6 +614,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (Array.isArray(parsed.todos)) {
         setTodos(parsed.todos);
+      }
+      if (Array.isArray(parsed.ideas)) {
+        setIdeas(parsed.ideas);
       }
       if (parsed.user) {
         setUser(parsed.user);
@@ -619,6 +680,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         habits,
         logs,
         todos,
+        ideas,
         user,
         selectedDate,
         setSelectedDate,
@@ -650,6 +712,10 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteTodo,
         reorderTodos,
         clearCompletedTodos,
+        addIdea,
+        updateIdea,
+        deleteIdea,
+        togglePinIdea,
         resetToDefaults,
         resetFullSystem,
         importData,

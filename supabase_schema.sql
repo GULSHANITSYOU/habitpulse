@@ -10,14 +10,18 @@ drop table if exists public.user_cloud_sync cascade;
 drop table if exists public.profiles cascade;
 
 -- 1. Create Cloud Sync Table (High-efficiency multi-device sync for Premium users)
-create table public.user_cloud_sync (
+create table if not exists public.user_cloud_sync (
   user_id text primary key,
   habits jsonb not null default '[]'::jsonb,
   logs jsonb not null default '[]'::jsonb,
   todos jsonb not null default '[]'::jsonb,
+  ideas jsonb not null default '[]'::jsonb,
   user_profile jsonb not null default '{}'::jsonb,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
+
+-- Ensure column exists if table was already created
+alter table public.user_cloud_sync add column if not exists ideas jsonb not null default '[]'::jsonb;
 
 -- 2. Create User Profiles Table (Stores tier, status and subscription)
 create table public.profiles (

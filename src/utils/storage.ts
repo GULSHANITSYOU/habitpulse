@@ -1,4 +1,4 @@
-import type { Habit, HabitLog, UserProfile, TodoItem } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, TodoItem, IdeaItem } from '../types/habit';
 import { formatDateKey } from './dateUtils';
 
 export const STORAGE_KEYS = {
@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   LOGS: 'habitpulse_logs_v1',
   USER: 'habitpulse_user_v1',
   TODOS: 'habitpulse_todos_v1',
+  IDEAS: 'habitpulse_ideas_v1',
   INITIALIZED: 'habitpulse_initialized_v1',
 };
 
@@ -206,6 +207,7 @@ export function resetSystemStorage(preserveTheme = true): { habits: Habit[]; log
     saveHabitsToStorage([]);
     saveLogsToStorage([]);
     saveTodosToStorage([]);
+    saveIdeasToStorage([]);
     saveUserToStorage(resetUser);
     localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
     return {
@@ -327,6 +329,51 @@ export function saveTodosToStorage(todos: TodoItem[]): void {
     localStorage.setItem(STORAGE_KEYS.TODOS, JSON.stringify(todos));
   } catch (err) {
     console.error('Failed to save todos to storage', err);
+  }
+}
+
+// Initial sample ideas
+export const defaultSeedIdeas: IdeaItem[] = [
+  {
+    id: 'idea-1',
+    title: 'AI Micro-Habit Coach Agent',
+    description: 'An autonomous agent that analyzes daily completion trends, detects slump days, and suggests 2-minute starter versions of difficult habits to rebuild momentum.',
+    resources: 'https://clerk.com/docs\nhttps://supabase.com/docs/guides/database\nAtomic Habits book by James Clear',
+    category: 'Productivity',
+    pinned: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'idea-2',
+    title: 'Minimalist Focus Dashboard Widget',
+    description: 'A distraction-free macOS / Windows mini window showing today’s top 3 rituals and active pomodoro timer with zero UI clutter.',
+    resources: 'https://www.electronjs.org/docs\nhttps://tauri.app\nFigma design system',
+    category: 'Tech',
+    pinned: false,
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+];
+
+export function loadIdeasFromStorage(): IdeaItem[] {
+  try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const data = localStorage.getItem(STORAGE_KEYS.IDEAS);
+    if (!data && !isInitialized) {
+      saveIdeasToStorage(defaultSeedIdeas);
+      return defaultSeedIdeas;
+    }
+    return data ? JSON.parse(data) : [];
+  } catch (err) {
+    console.error('Failed to load ideas from storage', err);
+    return [];
+  }
+}
+
+export function saveIdeasToStorage(ideas: IdeaItem[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.IDEAS, JSON.stringify(ideas));
+  } catch (err) {
+    console.error('Failed to save ideas to storage', err);
   }
 }
 

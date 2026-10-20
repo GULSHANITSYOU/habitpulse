@@ -9,7 +9,7 @@ import {
   type CloudPayload,
 } from '../lib/supabase';
 import type { AuthUser, CloudSyncStatus, SubscriptionPlan } from '../types/auth';
-import type { Habit, HabitLog, TodoItem, UserProfile } from '../types/habit';
+import type { Habit, HabitLog, TodoItem, UserProfile, IdeaItem } from '../types/habit';
 
 interface AuthContextType {
   currentUser: AuthUser | null;
@@ -32,7 +32,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   upgradeSubscription: (plan: 'monthly' | 'yearly' | 'lifetime', paymentId?: string) => Promise<void>;
   cancelSubscription: () => Promise<void>;
-  syncCurrentDataToCloud: (data: { habits: Habit[]; logs: HabitLog[]; todos: TodoItem[]; user: UserProfile }) => Promise<void>;
+  syncCurrentDataToCloud: (data: { habits: Habit[]; logs: HabitLog[]; todos: TodoItem[]; ideas?: IdeaItem[]; user: UserProfile }) => Promise<void>;
   loadCloudDataIntoApp: () => Promise<CloudPayload | null>;
 }
 
@@ -191,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sync current data to cloud (For Pro users with active Clerk login)
   const syncCurrentDataToCloud = useCallback(
-    async (data: { habits: Habit[]; logs: HabitLog[]; todos: TodoItem[]; user: UserProfile }) => {
+    async (data: { habits: Habit[]; logs: HabitLog[]; todos: TodoItem[]; ideas?: IdeaItem[]; user: UserProfile }) => {
       if (!isPremium || !currentUser) {
         setCloudSyncStatus('local_only');
         return;
@@ -208,6 +208,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           habits: data.habits,
           logs: data.logs,
           todos: data.todos,
+          ideas: data.ideas || [],
           user: {
             ...data.user,
             isPremium: true,
