@@ -195,7 +195,6 @@ class SoundSynthesizer {
 
   // Ambient sound synthesizer
   private ambientNoiseSource: AudioNode | null = null;
-  private ambientGainNode: GainNode | null = null;
 
   startBrownNoise() {
     this.stopAmbient();
@@ -227,7 +226,6 @@ class SoundSynthesizer {
 
       whiteNoise.start();
       this.ambientNoiseSource = whiteNoise;
-      this.ambientGainNode = gain;
     } catch {
       // Audio might fail before user interaction
     }
@@ -241,7 +239,6 @@ class SoundSynthesizer {
         // Ignored
       }
       this.ambientNoiseSource = null;
-      this.ambientGainNode = null;
     }
   }
 }

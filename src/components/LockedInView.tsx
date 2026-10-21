@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Flame,
   Play,
@@ -11,7 +11,6 @@ import {
   Minimize2,
   Volume2,
   VolumeX,
-  Plus,
   Trash2,
   Search,
   Sparkles,
@@ -20,12 +19,10 @@ import {
   GraduationCap,
   Brain,
   History,
-  TrendingUp,
   X,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { soundFx } from '../utils/audio';
-import type { FocusSession } from '../types/habit';
 
 const TOPIC_PRESETS = [
   { name: 'Research', icon: Search },
