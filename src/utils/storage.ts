@@ -1,4 +1,4 @@
-import type { Habit, HabitLog, UserProfile, TodoItem, IdeaItem } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, TodoItem, IdeaItem, FocusSession } from '../types/habit';
 import { formatDateKey } from './dateUtils';
 
 export const STORAGE_KEYS = {
@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   USER: 'habitpulse_user_v1',
   TODOS: 'habitpulse_todos_v1',
   IDEAS: 'habitpulse_ideas_v1',
+  FOCUS_SESSIONS: 'habitpulse_focus_sessions_v1',
   INITIALIZED: 'habitpulse_initialized_v1',
 };
 
@@ -208,6 +209,7 @@ export function resetSystemStorage(preserveTheme = true): { habits: Habit[]; log
     saveLogsToStorage([]);
     saveTodosToStorage([]);
     saveIdeasToStorage([]);
+    saveFocusSessionsToStorage([]);
     saveUserToStorage(resetUser);
     localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
     return {
@@ -374,6 +376,56 @@ export function saveIdeasToStorage(ideas: IdeaItem[]): void {
     localStorage.setItem(STORAGE_KEYS.IDEAS, JSON.stringify(ideas));
   } catch (err) {
     console.error('Failed to save ideas to storage', err);
+  }
+}
+
+// Initial sample focus sessions
+export const defaultSeedFocusSessions: FocusSession[] = [
+  {
+    id: 'fs-seed-1',
+    topic: 'Research & Architecture',
+    mode: 'timer',
+    durationSeconds: 1500,
+    durationMinutes: 25,
+    targetMinutes: 25,
+    completed: true,
+    notes: 'Locked in on project architecture and deep work flow',
+    startedAt: new Date(Date.now() - 7200000).toISOString(),
+    completedAt: new Date(Date.now() - 7200000 + 1500000).toISOString(),
+  },
+  {
+    id: 'fs-seed-2',
+    topic: 'Studying & Reading',
+    mode: 'stopwatch',
+    durationSeconds: 2700,
+    durationMinutes: 45,
+    completed: true,
+    notes: 'Completed 45 minutes of non-fiction deep reading',
+    startedAt: new Date(Date.now() - 3600000).toISOString(),
+    completedAt: new Date(Date.now() - 3600000 + 2700000).toISOString(),
+  },
+];
+
+export function loadFocusSessionsFromStorage(): FocusSession[] {
+  try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const data = localStorage.getItem(STORAGE_KEYS.FOCUS_SESSIONS);
+    if (!data && !isInitialized) {
+      saveFocusSessionsToStorage(defaultSeedFocusSessions);
+      return defaultSeedFocusSessions;
+    }
+    return data ? JSON.parse(data) : [];
+  } catch (err) {
+    console.error('Failed to load focus sessions from storage', err);
+    return [];
+  }
+}
+
+export function saveFocusSessionsToStorage(sessions: FocusSession[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.FOCUS_SESSIONS, JSON.stringify(sessions));
+  } catch (err) {
+    console.error('Failed to save focus sessions to storage', err);
   }
 }
 

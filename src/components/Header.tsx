@@ -67,12 +67,13 @@ export const Header: React.FC = () => {
   const xpPercent = Math.min(100, Math.round((xpCurrentLevel / 150) * 100));
 
   const navItems: {
-    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'analytics' | 'manage';
+    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'locked_in' | 'analytics' | 'manage';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }[] = [
     { id: 'today', label: 'Today', icon: Calendar },
+    { id: 'locked_in', label: 'Locked In', icon: Flame },
     { id: 'weekly', label: 'Weekly Grid', icon: Grid },
     { id: 'heatmap', label: 'Heatmap', icon: Sparkles },
     { id: 'todos', label: 'To-Dos', icon: CheckSquare, badge: activeTodosCount > 0 ? activeTodosCount : undefined },

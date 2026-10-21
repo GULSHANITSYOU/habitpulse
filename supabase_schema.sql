@@ -3,11 +3,10 @@
 -- Compatible with Clerk Auth (User IDs are TEXT like 'user_2xxx')
 -- =========================================================================
 
--- Clean up existing legacy tables and triggers
+-- Clean up existing legacy auth triggers
 drop trigger if exists on_auth_user_created on auth.users;
 drop function if exists public.handle_new_user();
-drop table if exists public.user_cloud_sync cascade;
-drop table if exists public.profiles cascade;
+-- (Note: Do not drop tables destructively on production migrations)
 
 -- 1. Create Cloud Sync Table (High-efficiency multi-device sync for Premium users)
 create table if not exists public.user_cloud_sync (
@@ -16,15 +15,17 @@ create table if not exists public.user_cloud_sync (
   logs jsonb not null default '[]'::jsonb,
   todos jsonb not null default '[]'::jsonb,
   ideas jsonb not null default '[]'::jsonb,
+  focus_sessions jsonb not null default '[]'::jsonb,
   user_profile jsonb not null default '{}'::jsonb,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
 
 -- Ensure column exists if table was already created
 alter table public.user_cloud_sync add column if not exists ideas jsonb not null default '[]'::jsonb;
+alter table public.user_cloud_sync add column if not exists focus_sessions jsonb not null default '[]'::jsonb;
 
 -- 2. Create User Profiles Table (Stores tier, status and subscription)
-create table public.profiles (
+create table if not exists public.profiles (
   id text primary key,
   email text,
   full_name text,
@@ -41,6 +42,15 @@ alter table public.user_cloud_sync enable row level security;
 alter table public.profiles enable row level security;
 
 -- 4. Open Policies allowing client-side direct upsert/read by Clerk User ID
+drop policy if exists "Allow select on user_cloud_sync" on public.user_cloud_sync;
+drop policy if exists "Allow insert on user_cloud_sync" on public.user_cloud_sync;
+drop policy if exists "Allow update on user_cloud_sync" on public.user_cloud_sync;
+drop policy if exists "Allow delete on user_cloud_sync" on public.user_cloud_sync;
+drop policy if exists "Allow select on profiles" on public.profiles;
+drop policy if exists "Allow insert on profiles" on public.profiles;
+drop policy if exists "Allow update on profiles" on public.profiles;
+drop policy if exists "Allow delete on profiles" on public.profiles;
+
 create policy "Allow select on user_cloud_sync"
   on public.user_cloud_sync for select
   using (true);

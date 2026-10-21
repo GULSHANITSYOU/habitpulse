@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem, IdeaItem } from '../types/habit';
+import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem, IdeaItem, FocusSession } from '../types/habit';
 import {
   loadHabitsFromStorage,
   saveHabitsToStorage,
@@ -12,6 +12,8 @@ import {
   saveTodosToStorage,
   loadIdeasFromStorage,
   saveIdeasToStorage,
+  loadFocusSessionsFromStorage,
+  saveFocusSessionsToStorage,
   getInitialSeedData,
   resetSystemStorage,
 } from '../utils/storage';
@@ -25,13 +27,14 @@ import {
 import { soundFx } from '../utils/audio';
 import { useAuth } from './AuthContext';
 
-export type ActiveTabType = 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'analytics' | 'manage';
+export type ActiveTabType = 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'locked_in' | 'analytics' | 'manage';
 
 interface HabitContextType {
   habits: Habit[];
   logs: HabitLog[];
   todos: TodoItem[];
   ideas: IdeaItem[];
+  focusSessions: FocusSession[];
   user: UserProfile;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
@@ -73,6 +76,11 @@ interface HabitContextType {
   updateIdea: (id: string, updates: Partial<IdeaItem>) => void;
   deleteIdea: (id: string) => void;
   togglePinIdea: (id: string) => void;
+
+  // Locked In Focus Actions
+  addFocusSession: (session: Omit<FocusSession, 'id'>) => void;
+  deleteFocusSession: (id: string) => void;
+  clearFocusSessions: () => void;
   
   // Settings & Storage
   resetToDefaults: () => void;
@@ -101,6 +109,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [logs, setLogs] = useState<HabitLog[]>(() => loadLogsFromStorage());
   const [todos, setTodos] = useState<TodoItem[]>(() => loadTodosFromStorage());
   const [ideas, setIdeas] = useState<IdeaItem[]>(() => loadIdeasFromStorage());
+  const [focusSessions, setFocusSessions] = useState<FocusSession[]>(() => loadFocusSessionsFromStorage());
   const [user, setUser] = useState<UserProfile>(() => loadUserFromStorage());
 
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
@@ -130,6 +139,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (Array.isArray(cloudData.logs)) setLogs(cloudData.logs);
           if (Array.isArray(cloudData.todos)) setTodos(cloudData.todos);
           if (Array.isArray(cloudData.ideas)) setIdeas(cloudData.ideas);
+          if (Array.isArray(cloudData.focus_sessions)) setFocusSessions(cloudData.focus_sessions);
           if (cloudData.user) setUser((prev) => ({ ...prev, ...cloudData.user }));
         }
         isCloudInitialLoaded.current = true;
@@ -162,6 +172,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveIdeasToStorage(ideas);
   }, [ideas]);
 
+  // Persist focus sessions on change
+  useEffect(() => {
+    saveFocusSessionsToStorage(focusSessions);
+  }, [focusSessions]);
+
   // Persist user and apply dark/light class
   useEffect(() => {
     saveUserToStorage(user);
@@ -182,10 +197,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         logs,
         todos,
         ideas,
+        focus_sessions: focusSessions,
         user,
       });
     }
-  }, [habits, logs, todos, ideas, user, isPremium, currentUser, syncCurrentDataToCloud]);
+  }, [habits, logs, todos, ideas, focusSessions, user, isPremium, currentUser, syncCurrentDataToCloud]);
 
   // Confetti helper
   const triggerConfetti = useCallback(() => {
@@ -564,6 +580,30 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(user.soundEnabled);
   }, [user.soundEnabled]);
 
+  // Locked In Focus Session Actions
+  const addFocusSession = useCallback((data: Omit<FocusSession, 'id'>) => {
+    const newSession: FocusSession = {
+      ...data,
+      id: `fs-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    };
+    setFocusSessions((prev) => [newSession, ...prev]);
+    soundFx.playCompletion(user.soundEnabled);
+    triggerConfetti();
+    // Award XP based on minutes focused (at least 15 XP + 1 XP per minute)
+    const earnedXp = Math.max(15, Math.round(data.durationMinutes * 1.5));
+    addXp(earnedXp);
+  }, [user.soundEnabled, triggerConfetti, addXp]);
+
+  const deleteFocusSession = useCallback((id: string) => {
+    setFocusSessions((prev) => prev.filter((s) => s.id !== id));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const clearFocusSessions = useCallback(() => {
+    setFocusSessions([]);
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
   // Reset all data to rich seed demo
   const resetToDefaults = useCallback(() => {
     const initial = getInitialSeedData();
@@ -572,10 +612,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setUser(initial.user);
     setTodos(loadTodosFromStorage());
     setIdeas(loadIdeasFromStorage());
+    setFocusSessions(loadFocusSessionsFromStorage());
     soundFx.playTap(true);
   }, []);
 
-  // Reset full system: wipe all habits, all logs, all todos, all ideas, reset user to Level 1 (0 XP)
+  // Reset full system: wipe all habits, all logs, all todos, all ideas, all focus sessions, reset user to Level 1 (0 XP)
   const resetFullSystem = useCallback(() => {
     const resetResult = resetSystemStorage(true);
     setHabits(resetResult.habits);
@@ -583,6 +624,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setUser(resetResult.user);
     setTodos([]);
     setIdeas([]);
+    setFocusSessions([]);
     setSelectedDate(getTodayKey());
     setActiveTab('today');
     soundFx.playTap(true);
@@ -597,10 +639,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       logs,
       todos,
       ideas,
+      focusSessions,
       user,
     };
     return JSON.stringify(data, null, 2);
-  }, [habits, logs, todos, ideas, user]);
+  }, [habits, logs, todos, ideas, focusSessions, user]);
 
   // Import JSON
   const importData = useCallback((jsonStr: string): boolean => {
@@ -617,6 +660,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (Array.isArray(parsed.ideas)) {
         setIdeas(parsed.ideas);
+      }
+      if (Array.isArray(parsed.focusSessions)) {
+        setFocusSessions(parsed.focusSessions);
       }
       if (parsed.user) {
         setUser(parsed.user);
@@ -681,6 +727,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         logs,
         todos,
         ideas,
+        focusSessions,
         user,
         selectedDate,
         setSelectedDate,
@@ -716,6 +763,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateIdea,
         deleteIdea,
         togglePinIdea,
+        addFocusSession,
+        deleteFocusSession,
+        clearFocusSessions,
         resetToDefaults,
         resetFullSystem,
         importData,

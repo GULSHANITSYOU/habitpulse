@@ -133,6 +133,117 @@ class SoundSynthesizer {
       // Ignored
     }
   }
+
+  // Deep focus gong on start
+  playFocusStart(enabled: boolean = true) {
+    if (!enabled) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      [220, 329.63, 440].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+
+        gain.gain.setValueAtTime(0.07, now + idx * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 1.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.05);
+        osc.stop(now + idx * 0.05 + 1.25);
+      });
+    } catch {
+      // Ignored
+    }
+  }
+
+  // Focus complete celebration fanfare
+  playFocusComplete(enabled: boolean = true) {
+    if (!enabled) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const notes = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
+
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+
+        gain.gain.setValueAtTime(0.1, now + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.45);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 0.5);
+      });
+    } catch {
+      // Ignored
+    }
+  }
+
+  // Ambient sound synthesizer
+  private ambientNoiseSource: AudioNode | null = null;
+  private ambientGainNode: GainNode | null = null;
+
+  startBrownNoise() {
+    this.stopAmbient();
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = buffer.getChannelData(0);
+      let lastOut = 0.0;
+
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        output[i] = (lastOut + 0.02 * white) / 1.02;
+        lastOut = output[i];
+        output[i] *= 3.5;
+      }
+
+      const whiteNoise = ctx.createBufferSource();
+      whiteNoise.buffer = buffer;
+      whiteNoise.loop = true;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+
+      whiteNoise.connect(gain);
+      gain.connect(ctx.destination);
+
+      whiteNoise.start();
+      this.ambientNoiseSource = whiteNoise;
+      this.ambientGainNode = gain;
+    } catch {
+      // Audio might fail before user interaction
+    }
+  }
+
+  stopAmbient() {
+    if (this.ambientNoiseSource) {
+      try {
+        (this.ambientNoiseSource as AudioScheduledSourceNode).stop();
+      } catch {
+        // Ignored
+      }
+      this.ambientNoiseSource = null;
+      this.ambientGainNode = null;
+    }
+  }
 }
 
 export const soundFx = new SoundSynthesizer();

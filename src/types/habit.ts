@@ -94,3 +94,17 @@ export interface IdeaItem {
   updatedAt?: string;
 }
 
+export interface FocusSession {
+  id: string;
+  topic: string;
+  mode: 'timer' | 'stopwatch';
+  durationSeconds: number;
+  durationMinutes: number;
+  targetMinutes?: number;
+  completed: boolean;
+  notes?: string;
+  startedAt: string;
+  completedAt: string;
+}
+
+
