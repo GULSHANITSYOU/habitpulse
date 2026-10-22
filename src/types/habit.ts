@@ -35,6 +35,7 @@ export interface Habit {
   archived: boolean;
   createdAt: string;   // ISO format
   reminderTime?: string; // e.g. '08:00'
+  order?: number;      // Custom user display order
 }
 
 export interface HabitLog {

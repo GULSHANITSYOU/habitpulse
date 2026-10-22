@@ -35,7 +35,8 @@ const MainContent: React.FC = () => {
     filterCategory,
     filterTimeOfDay,
     searchQuery,
-    getHabitLog,
+    moveHabit,
+    moveHabitStep,
     deletePendingHabit,
     confirmDeleteHabit,
     cancelDeleteHabit,
@@ -44,6 +45,39 @@ const MainContent: React.FC = () => {
   const { isPremium, isLifetime } = useAuth();
 
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = React.useState(false);
+  const [draggedHabitId, setDraggedHabitId] = React.useState<string | null>(null);
+  const [dragOverHabitId, setDragOverHabitId] = React.useState<string | null>(null);
+
+  const handleHabitDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedHabitId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  };
+
+  const handleHabitDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverHabitId !== id) {
+      setDragOverHabitId(id);
+    }
+  };
+
+  const handleHabitDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedHabitId || draggedHabitId === targetId) {
+      setDraggedHabitId(null);
+      setDragOverHabitId(null);
+      return;
+    }
+    moveHabit(draggedHabitId, targetId);
+    setDraggedHabitId(null);
+    setDragOverHabitId(null);
+  };
+
+  const handleHabitDragEnd = () => {
+    setDraggedHabitId(null);
+    setDragOverHabitId(null);
+  };
 
   const activeHabits = habits.filter((h) => !h.archived);
 
@@ -65,15 +99,6 @@ const MainContent: React.FC = () => {
     return true;
   });
 
-  const sortedScheduledHabits = [...scheduledHabits].sort((a, b) => {
-    const logA = getHabitLog(a.id, selectedDate);
-    const logB = getHabitLog(b.id, selectedDate);
-    const doneA = Boolean(logA?.completed);
-    const doneB = Boolean(logB?.completed);
-    if (doneA === doneB) return 0;
-    return doneA ? 1 : -1;
-  });
-
   return (
     <div className="min-h-screen flex flex-col bg-zinc-100 dark:bg-black text-black dark:text-white transition-colors selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       <Header />
@@ -88,11 +113,11 @@ const MainContent: React.FC = () => {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight whitespace-nowrap">
-                    Daily Rituals ({sortedScheduledHabits.length})
+                    Daily Rituals ({scheduledHabits.length})
                   </h3>
-                  {sortedScheduledHabits.length > 0 && (
+                  {scheduledHabits.length > 0 && (
                     <span className="hidden sm:inline text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                      • Tap to complete or track progress
+                      • Drag cards to reorder • Tap to track
                     </span>
                   )}
                 </div>
@@ -106,7 +131,7 @@ const MainContent: React.FC = () => {
                 </button>
               </div>
 
-              {sortedScheduledHabits.length === 0 ? (
+              {scheduledHabits.length === 0 ? (
                 <div className="p-8 sm:p-12 rounded-2xl card-neo text-center space-y-4">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white flex items-center justify-center border border-zinc-200 dark:border-zinc-800">
                     <Sparkles className="w-6 h-6" />
@@ -129,8 +154,23 @@ const MainContent: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
-                  {sortedScheduledHabits.map((habit) => (
-                    <HabitCard key={habit.id} habit={habit} dateKey={selectedDate} />
+                  {scheduledHabits.map((habit, index) => (
+                    <HabitCard
+                      key={habit.id}
+                      habit={habit}
+                      dateKey={selectedDate}
+                      draggable
+                      onDragStart={(e) => handleHabitDragStart(e, habit.id)}
+                      onDragOver={(e) => handleHabitDragOver(e, habit.id)}
+                      onDrop={(e) => handleHabitDrop(e, habit.id)}
+                      onDragEnd={handleHabitDragEnd}
+                      isDragging={draggedHabitId === habit.id}
+                      isDragOver={dragOverHabitId === habit.id}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < scheduledHabits.length - 1}
+                      onMoveUp={() => moveHabitStep(habit.id, 'up')}
+                      onMoveDown={() => moveHabitStep(habit.id, 'down')}
+                    />
                   ))}
                 </div>
               )}

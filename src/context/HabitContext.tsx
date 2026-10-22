@@ -57,6 +57,9 @@ interface HabitContextType {
   cancelDeleteHabit: () => void;
   resetDeleteConfirmPreference: () => void;
   toggleArchiveHabit: (id: string) => void;
+  reorderHabits: (newHabits: Habit[]) => void;
+  moveHabit: (sourceId: string, targetId: string) => void;
+  moveHabitStep: (habitId: string, direction: 'up' | 'down') => void;
   toggleHabitCompletion: (habitId: string, dateStr?: string) => void;
   setHabitNumericValue: (habitId: string, value: number, dateStr?: string) => void;
   incrementHabitValue: (habitId: string, delta: number, dateStr?: string) => void;
@@ -439,6 +442,50 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(user.soundEnabled);
   }, [user.soundEnabled]);
 
+  // Reorder habits directly
+  const reorderHabits = useCallback((newHabits: Habit[]) => {
+    const normalized = newHabits.map((h, index) => ({
+      ...h,
+      order: index,
+    }));
+    setHabits(normalized);
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  // Move habit from sourceId to targetId position
+  const moveHabit = useCallback((sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    setHabits((prev) => {
+      const sourceIndex = prev.findIndex((h) => h.id === sourceId);
+      const targetIndex = prev.findIndex((h) => h.id === targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return prev;
+
+      const next = [...prev];
+      const [moved] = next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, moved);
+
+      return next.map((h, index) => ({ ...h, order: index }));
+    });
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  // Move habit 1 step up or down
+  const moveHabitStep = useCallback((habitId: string, direction: 'up' | 'down') => {
+    setHabits((prev) => {
+      const currentIndex = prev.findIndex((h) => h.id === habitId);
+      if (currentIndex === -1) return prev;
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+
+      const next = [...prev];
+      const [moved] = next.splice(currentIndex, 1);
+      next.splice(targetIndex, 0, moved);
+
+      return next.map((h, index) => ({ ...h, order: index }));
+    });
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
   // Load preset templates
   const loadTemplate = useCallback((templates: Partial<Habit>[]) => {
     const newHabits: Habit[] = templates.map((tpl) => ({
@@ -748,6 +795,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         cancelDeleteHabit,
         resetDeleteConfirmPreference,
         toggleArchiveHabit,
+        reorderHabits,
+        moveHabit,
+        moveHabitStep,
         toggleHabitCompletion,
         setHabitNumericValue,
         incrementHabitValue,

@@ -13,6 +13,9 @@ import {
   Sun,
   Moon,
   Clock,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import type { Habit } from '../types/habit';
 import { useHabits } from '../context/HabitContext';
@@ -23,9 +26,34 @@ import { HabitNoteModal } from './HabitNoteModal';
 interface HabitCardProps {
   habit: Habit;
   dateKey?: string;
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
-export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
+export const HabitCard: React.FC<HabitCardProps> = ({
+  habit,
+  dateKey,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragging,
+  isDragOver,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+}) => {
   const {
     selectedDate,
     getHabitLog,
@@ -62,13 +90,30 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
   return (
     <>
       <div
+        draggable={draggable}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragEnd={onDragEnd}
         className={`card-neo rounded-2xl p-5 relative transition-all duration-200 ${
           isCompleted ? 'card-active' : ''
+        } ${
+          isDragging ? 'opacity-35 scale-[0.98] border-dashed border-zinc-400 dark:border-zinc-500 shadow-none' : ''
+        } ${
+          isDragOver ? 'ring-2 ring-black dark:ring-white scale-[1.01] shadow-xl' : ''
         }`}
       >
         {/* Top Header: Category, Time, Streaks, Menu */}
         <div className="flex items-start justify-between gap-3 mb-3.5">
           <div className="flex flex-wrap items-center gap-2">
+            {/* Drag Handle */}
+            <div
+              title="Drag to rearrange order"
+              className="p-1 -ml-1 text-zinc-400 hover:text-black dark:hover:text-white cursor-grab active:cursor-grabbing transition rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <GripVertical className="w-3.5 h-3.5" />
+            </div>
+
             {/* Category Badge */}
             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white border border-zinc-200 dark:border-zinc-800">
               {habit.category}
@@ -122,6 +167,33 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, dateKey }) => {
                 <>
                   <div className="fixed inset-0 z-20" onClick={() => setIsMenuOpen(false)} />
                   <div className="absolute right-0 mt-1 w-44 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 shadow-xl py-1 z-30 text-xs">
+                    {onMoveUp && canMoveUp && (
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onMoveUp();
+                        }}
+                        className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                        <span>Move Up</span>
+                      </button>
+                    )}
+                    {onMoveDown && canMoveDown && (
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onMoveDown();
+                        }}
+                        className="w-full px-3 py-2 text-left flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                        <span>Move Down</span>
+                      </button>
+                    )}
+                    {(canMoveUp || canMoveDown) && (
+                      <div className="border-t border-zinc-200 dark:border-zinc-800 my-1" />
+                    )}
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);

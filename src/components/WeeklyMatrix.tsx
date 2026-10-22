@@ -1,14 +1,57 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check, Minus, Flame, Calendar } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Minus,
+  Flame,
+  Calendar,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { getCurrentWeekDays, isHabitScheduledForDate } from '../utils/dateUtils';
 import { HabitIcon } from './HabitIcon';
 
 export const WeeklyMatrix: React.FC = () => {
-  const { habits, logs, toggleHabitCompletion, getHabitStats } = useHabits();
+  const { habits, logs, toggleHabitCompletion, getHabitStats, moveHabit, moveHabitStep } = useHabits();
   const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+  const [draggedHabitId, setDraggedHabitId] = useState<string | null>(null);
+  const [dragOverHabitId, setDragOverHabitId] = useState<string | null>(null);
 
   const activeHabits = habits.filter((h) => !h.archived);
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedHabitId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverHabitId !== id) {
+      setDragOverHabitId(id);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedHabitId || draggedHabitId === targetId) {
+      setDraggedHabitId(null);
+      setDragOverHabitId(null);
+      return;
+    }
+    moveHabit(draggedHabitId, targetId);
+    setDraggedHabitId(null);
+    setDragOverHabitId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedHabitId(null);
+    setDragOverHabitId(null);
+  };
 
   const changeWeek = (direction: number) => {
     const next = new Date(referenceDate);
@@ -34,7 +77,7 @@ export const WeeklyMatrix: React.FC = () => {
             <h2 className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight">Weekly Consistency Matrix</h2>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Glance at your habit progress across {weekStartStr} – {weekEndStr}
+            Glance at your habit progress across {weekStartStr} – {weekEndStr} • Drag rows to reorder habits
           </p>
         </div>
 
@@ -95,7 +138,7 @@ export const WeeklyMatrix: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {activeHabits.map((habit) => {
+            {activeHabits.map((habit, index) => {
               const stats = getHabitStats(habit);
 
               let scheduledThisWeek = 0;
@@ -112,11 +155,64 @@ export const WeeklyMatrix: React.FC = () => {
                 }
               });
 
+              const isDraggingThis = draggedHabitId === habit.id;
+              const isDragOverThis = dragOverHabitId === habit.id;
+
               return (
-                <tr key={habit.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
-                  {/* Habit Info Cell */}
-                  <td className="py-3.5 px-5">
-                    <div className="flex items-center gap-3">
+                <tr
+                  key={habit.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, habit.id)}
+                  onDragOver={(e) => handleDragOver(e, habit.id)}
+                  onDrop={(e) => handleDrop(e, habit.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`transition-colors cursor-grab active:cursor-grabbing ${
+                    isDraggingThis
+                      ? 'opacity-30 bg-zinc-100 dark:bg-zinc-800'
+                      : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/40'
+                  } ${
+                    isDragOverThis
+                      ? 'border-t-2 border-b-2 border-black dark:border-white bg-zinc-100/70 dark:bg-zinc-900/80 shadow-md'
+                      : ''
+                  }`}
+                >
+                  {/* Habit Info Cell with Drag Handle */}
+                  <td className="py-3.5 px-4 sm:px-5">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      {/* Drag Handle & Mobile Reorder Arrows */}
+                      <div className="flex items-center gap-0.5 shrink-0 text-zinc-400">
+                        <div
+                          title="Drag row to rearrange habit order"
+                          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 cursor-grab active:cursor-grabbing transition"
+                        >
+                          <GripVertical className="w-3.5 h-3.5 text-zinc-400 hover:text-black dark:hover:text-white" />
+                        </div>
+                        <div className="flex flex-col -space-y-0.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveHabitStep(habit.id, 'up');
+                            }}
+                            disabled={index === 0}
+                            title="Move Up"
+                            className="p-0.5 text-zinc-400 hover:text-black dark:hover:text-white disabled:opacity-20 transition"
+                          >
+                            <ChevronUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveHabitStep(habit.id, 'down');
+                            }}
+                            disabled={index === activeHabits.length - 1}
+                            title="Move Down"
+                            className="p-0.5 text-zinc-400 hover:text-black dark:hover:text-white disabled:opacity-20 transition"
+                          >
+                            <ChevronDown className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white">
                         <HabitIcon name={habit.icon} size={16} />
                       </div>
