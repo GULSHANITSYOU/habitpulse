@@ -23,12 +23,26 @@ import {
   RefreshCw,
   AlertCircle,
   Lightbulb,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
+import type { ActiveTabType } from '../context/HabitContext';
 import { useAuth } from '../context/AuthContext';
 import { HabitModal } from './HabitModal';
 import { ExportImportModal } from './ExportImportModal';
 import { ResetSystemModal } from './ResetSystemModal';
+import { TabReorderModal } from './TabReorderModal';
+
+const DEFAULT_TAB_ORDER: ActiveTabType[] = [
+  'today',
+  'locked_in',
+  'weekly',
+  'heatmap',
+  'todos',
+  'ideas',
+  'analytics',
+  'manage',
+];
 
 export const Header: React.FC = () => {
   const {
@@ -54,6 +68,76 @@ export const Header: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isTabReorderModalOpen, setIsTabReorderModalOpen] = useState(false);
+
+  const [tabOrder, setTabOrder] = useState<ActiveTabType[]>(() => {
+    try {
+      const saved = localStorage.getItem('habitpulse_tab_order_v1');
+      if (saved) {
+        const parsed: ActiveTabType[] = JSON.parse(saved);
+        const valid = parsed.filter((id) => DEFAULT_TAB_ORDER.includes(id));
+        const missing = DEFAULT_TAB_ORDER.filter((id) => !valid.includes(id));
+        return [...valid, ...missing];
+      }
+    } catch {}
+    return DEFAULT_TAB_ORDER;
+  });
+
+  const saveTabOrder = (newOrder: ActiveTabType[]) => {
+    setTabOrder(newOrder);
+    try {
+      localStorage.setItem('habitpulse_tab_order_v1', JSON.stringify(newOrder));
+    } catch {}
+  };
+
+  const resetTabOrder = () => {
+    saveTabOrder(DEFAULT_TAB_ORDER);
+  };
+
+  // Drag and Drop for Tabs
+  const [draggedTabId, setDraggedTabId] = useState<ActiveTabType | null>(null);
+  const [dragOverTabId, setDragOverTabId] = useState<ActiveTabType | null>(null);
+
+  const handleTabDragStart = (e: React.DragEvent, id: ActiveTabType) => {
+    setDraggedTabId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  };
+
+  const handleTabDragOver = (e: React.DragEvent, id: ActiveTabType) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverTabId !== id) {
+      setDragOverTabId(id);
+    }
+  };
+
+  const handleTabDrop = (e: React.DragEvent, targetId: ActiveTabType) => {
+    e.preventDefault();
+    if (!draggedTabId || draggedTabId === targetId) {
+      setDraggedTabId(null);
+      setDragOverTabId(null);
+      return;
+    }
+
+    const currentList = [...tabOrder];
+    const sourceIndex = currentList.indexOf(draggedTabId);
+    const targetIndex = currentList.indexOf(targetId);
+
+    if (sourceIndex !== -1 && targetIndex !== -1) {
+      const [moved] = currentList.splice(sourceIndex, 1);
+      currentList.splice(targetIndex, 0, moved);
+      saveTabOrder(currentList);
+    }
+
+    setDraggedTabId(null);
+    setDragOverTabId(null);
+  };
+
+  const handleTabDragEnd = () => {
+    setDraggedTabId(null);
+    setDragOverTabId(null);
+  };
 
   const activeHabits = habits.filter((h) => !h.archived);
   const activeTodosCount = todos.filter((t) => !t.completed).length;
@@ -66,21 +150,21 @@ export const Header: React.FC = () => {
   const xpCurrentLevel = user.xp % 150;
   const xpPercent = Math.min(100, Math.round((xpCurrentLevel / 150) * 100));
 
-  const navItems: {
-    id: 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'locked_in' | 'analytics' | 'manage';
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    badge?: number;
-  }[] = [
-    { id: 'today', label: 'Today', icon: Calendar },
-    { id: 'locked_in', label: 'Locked In', icon: Flame },
-    { id: 'weekly', label: 'Weekly Grid', icon: Grid },
-    { id: 'heatmap', label: 'Heatmap', icon: Sparkles },
-    { id: 'todos', label: 'To-Dos', icon: CheckSquare, badge: activeTodosCount > 0 ? activeTodosCount : undefined },
-    { id: 'ideas', label: 'Ideas Vault', icon: Lightbulb, badge: ideas.length > 0 ? ideas.length : undefined },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'manage', label: 'All Habits', icon: ListTodo },
-  ];
+  const allNavMap: Record<
+    ActiveTabType,
+    { id: ActiveTabType; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }
+  > = {
+    today: { id: 'today', label: 'Today', icon: Calendar },
+    locked_in: { id: 'locked_in', label: 'Locked In', icon: Flame },
+    weekly: { id: 'weekly', label: 'Weekly Grid', icon: Grid },
+    heatmap: { id: 'heatmap', label: 'Heatmap', icon: Sparkles },
+    todos: { id: 'todos', label: 'To-Dos', icon: CheckSquare, badge: activeTodosCount > 0 ? activeTodosCount : undefined },
+    ideas: { id: 'ideas', label: 'Ideas Vault', icon: Lightbulb, badge: ideas.length > 0 ? ideas.length : undefined },
+    analytics: { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    manage: { id: 'manage', label: 'All Habits', icon: ListTodo },
+  };
+
+  const orderedNavItems = tabOrder.map((id) => allNavMap[id]).filter(Boolean);
 
   return (
     <>
@@ -279,17 +363,30 @@ export const Header: React.FC = () => {
 
           {/* Navigation Bar Tabs */}
           <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 sm:py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800 -mx-3 px-3 sm:mx-0 sm:px-0">
-            {navItems.map((item) => {
+            {orderedNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+              const isDragging = draggedTabId === item.id;
+              const isDragOver = dragOverTabId === item.id;
+
               return (
                 <button
                   key={item.id}
+                  draggable
+                  onDragStart={(e) => handleTabDragStart(e, item.id)}
+                  onDragOver={(e) => handleTabDragOver(e, item.id)}
+                  onDrop={(e) => handleTabDrop(e, item.id)}
+                  onDragEnd={handleTabDragEnd}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 ${
+                  title={`${item.label} (Drag to rearrange)`}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-grab active:cursor-grabbing select-none ${
                     isActive
                       ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm font-bold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                  } ${
+                    isDragging ? 'opacity-30 scale-95 border-dashed border-zinc-400 dark:border-zinc-600' : ''
+                  } ${
+                    isDragOver ? 'ring-2 ring-black dark:ring-white scale-105 shadow-md' : ''
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -308,6 +405,15 @@ export const Header: React.FC = () => {
                 </button>
               );
             })}
+
+            {/* Rearrange / Customize Tabs Modal Trigger */}
+            <button
+              onClick={() => setIsTabReorderModalOpen(true)}
+              title="Rearrange / Customize Navigation Tabs"
+              className="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition ml-1 shrink-0"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+            </button>
           </nav>
         </div>
       </header>
@@ -315,6 +421,20 @@ export const Header: React.FC = () => {
       {/* Modals */}
       {isAddModalOpen && <HabitModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
       {isBackupModalOpen && <ExportImportModal isOpen={isBackupModalOpen} onClose={() => setIsBackupModalOpen(false)} />}
+      {isTabReorderModalOpen && (
+        <TabReorderModal
+          isOpen={isTabReorderModalOpen}
+          onClose={() => setIsTabReorderModalOpen(false)}
+          tabOrder={tabOrder}
+          onReorder={saveTabOrder}
+          onReset={resetTabOrder}
+          activeTab={activeTab}
+          onSelectTab={(tab) => {
+            setActiveTab(tab);
+            setIsTabReorderModalOpen(false);
+          }}
+        />
+      )}
       {isResetModalOpen && (
         <ResetSystemModal
           isOpen={isResetModalOpen}
