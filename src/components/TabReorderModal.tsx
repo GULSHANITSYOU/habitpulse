@@ -14,6 +14,8 @@ import {
   Sparkles,
   CheckSquare,
   Lightbulb,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import type { ActiveTabType } from '../context/HabitContext';
 
@@ -22,6 +24,8 @@ interface TabReorderModalProps {
   onClose: () => void;
   tabOrder: ActiveTabType[];
   onReorder: (newOrder: ActiveTabType[]) => void;
+  hiddenTabs: ActiveTabType[];
+  onToggleHideTab: (tabId: ActiveTabType) => void;
   onReset: () => void;
   activeTab: ActiveTabType;
   onSelectTab: (tab: ActiveTabType) => void;
@@ -46,6 +50,8 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
   onClose,
   tabOrder,
   onReorder,
+  hiddenTabs,
+  onToggleHideTab,
   onReset,
   activeTab,
   onSelectTab,
@@ -62,6 +68,8 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
     onReorder(list);
   };
 
+  const visibleCount = tabOrder.filter((id) => !hiddenTabs.includes(id)).length;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
       <div
@@ -74,10 +82,10 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
           <div>
             <h3 className="text-base font-bold text-black dark:text-white">
-              Rearrange Navigation Tabs
+              Navigation Tabs & Visibility
             </h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Customize the order of your top navigation bar
+              Reorder or toggle visibility (eye icon) for each tab
             </p>
           </div>
           <button
@@ -95,6 +103,7 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
             if (!meta) return null;
             const Icon = meta.icon;
             const isCurrent = activeTab === tabId;
+            const isHidden = hiddenTabs.includes(tabId);
 
             return (
               <div
@@ -102,31 +111,84 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
                 className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
                   isCurrent
                     ? 'bg-zinc-100 dark:bg-zinc-900 border-black dark:border-white shadow-xs'
+                    : isHidden
+                    ? 'bg-zinc-100/40 dark:bg-zinc-950/40 border-zinc-200/60 dark:border-zinc-800/60 opacity-60'
                     : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800'
                 }`}
               >
                 <div
                   onClick={() => {
-                    onSelectTab(tabId);
+                    if (!isHidden) {
+                      onSelectTab(tabId);
+                    }
                   }}
-                  className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
+                  className={`flex items-center gap-3 flex-1 min-w-0 ${
+                    isHidden ? 'cursor-default' : 'cursor-pointer'
+                  }`}
                 >
                   <GripVertical className="w-4 h-4 text-zinc-400 shrink-0" />
-                  <div className="w-7 h-7 rounded-lg bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center text-black dark:text-white shrink-0">
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                      isHidden
+                        ? 'bg-zinc-200/40 dark:bg-zinc-800/40 text-zinc-400'
+                        : 'bg-zinc-200/60 dark:bg-zinc-800 text-black dark:text-white'
+                    }`}
+                  >
                     <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-xs font-bold text-black dark:text-white truncate">
+                  <span
+                    className={`text-xs font-bold truncate ${
+                      isHidden
+                        ? 'line-through text-zinc-400 dark:text-zinc-500'
+                        : 'text-black dark:text-white'
+                    }`}
+                  >
                     {meta.label}
                   </span>
-                  {isCurrent && (
+                  {isCurrent && !isHidden && (
                     <span className="text-[10px] font-bold text-black dark:text-white bg-zinc-200 dark:bg-zinc-800 px-2 py-0.5 rounded-full ml-auto mr-2">
                       Active
                     </span>
                   )}
+                  {isHidden && (
+                    <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-200/60 dark:bg-zinc-800/60 px-2 py-0.5 rounded-full ml-auto mr-2">
+                      Hidden
+                    </span>
+                  )}
                 </div>
 
-                {/* Move buttons */}
+                {/* Actions: Hide/Unhide Eye Toggle + Move Up/Down Buttons */}
                 <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {/* Eye Toggle */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleHideTab(tabId);
+                    }}
+                    disabled={!isHidden && visibleCount <= 1}
+                    title={
+                      isHidden
+                        ? 'Show tab in navbar'
+                        : visibleCount <= 1
+                        ? 'At least 1 tab must remain visible'
+                        : 'Hide tab from navbar'
+                    }
+                    className={`p-1.5 rounded-lg transition ${
+                      isHidden
+                        ? 'text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-white bg-zinc-200/40 dark:bg-zinc-800/40'
+                        : 'text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                    } disabled:opacity-30`}
+                  >
+                    {isHidden ? (
+                      <EyeOff className="w-4 h-4 text-zinc-400" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-zinc-200 dark:border-zinc-800 mx-0.5" />
+
+                  {/* Move Up */}
                   <button
                     onClick={() => moveTab(index, 'up')}
                     disabled={index === 0}
@@ -135,6 +197,8 @@ export const TabReorderModal: React.FC<TabReorderModalProps> = ({
                   >
                     <ChevronUp className="w-4 h-4" />
                   </button>
+
+                  {/* Move Down */}
                   <button
                     onClick={() => moveTab(index, 'down')}
                     disabled={index === tabOrder.length - 1}

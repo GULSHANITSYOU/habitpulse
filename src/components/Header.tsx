@@ -90,8 +90,42 @@ export const Header: React.FC = () => {
     } catch {}
   };
 
+  // Hidden Tabs State & Persistence
+  const [hiddenTabs, setHiddenTabs] = useState<ActiveTabType[]>(() => {
+    try {
+      const saved = localStorage.getItem('habitpulse_hidden_tabs_v1');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
+  const saveHiddenTabs = (newHidden: ActiveTabType[]) => {
+    setHiddenTabs(newHidden);
+    try {
+      localStorage.setItem('habitpulse_hidden_tabs_v1', JSON.stringify(newHidden));
+    } catch {}
+  };
+
+  const toggleHideTab = (tabId: ActiveTabType) => {
+    const isCurrentlyHidden = hiddenTabs.includes(tabId);
+    let updated: ActiveTabType[];
+    if (isCurrentlyHidden) {
+      updated = hiddenTabs.filter((id) => id !== tabId);
+    } else {
+      const visibleCount = tabOrder.filter((id) => !hiddenTabs.includes(id)).length;
+      if (visibleCount <= 1) return;
+      updated = [...hiddenTabs, tabId];
+      if (activeTab === tabId) {
+        const nextVisible = tabOrder.find((id) => id !== tabId && !hiddenTabs.includes(id));
+        if (nextVisible) setActiveTab(nextVisible);
+      }
+    }
+    saveHiddenTabs(updated);
+  };
+
   const resetTabOrder = () => {
     saveTabOrder(DEFAULT_TAB_ORDER);
+    saveHiddenTabs([]);
   };
 
   // Drag and Drop for Tabs
@@ -165,6 +199,7 @@ export const Header: React.FC = () => {
   };
 
   const orderedNavItems = tabOrder.map((id) => allNavMap[id]).filter(Boolean);
+  const visibleNavItems = orderedNavItems.filter((item) => !hiddenTabs.includes(item.id));
 
   return (
     <>
@@ -363,7 +398,7 @@ export const Header: React.FC = () => {
 
           {/* Navigation Bar Tabs */}
           <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 sm:py-2.5 no-scrollbar border-t border-zinc-200 dark:border-zinc-800 -mx-3 px-3 sm:mx-0 sm:px-0">
-            {orderedNavItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               const isDragging = draggedTabId === item.id;
@@ -427,6 +462,8 @@ export const Header: React.FC = () => {
           onClose={() => setIsTabReorderModalOpen(false)}
           tabOrder={tabOrder}
           onReorder={saveTabOrder}
+          hiddenTabs={hiddenTabs}
+          onToggleHideTab={toggleHideTab}
           onReset={resetTabOrder}
           activeTab={activeTab}
           onSelectTab={(tab) => {
