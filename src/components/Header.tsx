@@ -24,6 +24,7 @@ import {
   AlertCircle,
   Lightbulb,
   SlidersHorizontal,
+  Users,
 } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import type { ActiveTabType } from '../context/HabitContext';
@@ -35,6 +36,7 @@ import { TabReorderModal } from './TabReorderModal';
 
 const DEFAULT_TAB_ORDER: ActiveTabType[] = [
   'today',
+  'team',
   'locked_in',
   'weekly',
   'heatmap',
@@ -54,6 +56,8 @@ export const Header: React.FC = () => {
     habits,
     todos,
     ideas,
+    teamTasks,
+    currentMemberId,
     getHabitStats,
     resetFullSystem,
   } = useHabits();
@@ -175,6 +179,11 @@ export const Header: React.FC = () => {
 
   const activeHabits = habits.filter((h) => !h.archived);
   const activeTodosCount = todos.filter((t) => !t.completed).length;
+  const pendingTeamActionsCount = teamTasks.filter(
+    (t) =>
+      (t.assignedToId === currentMemberId && t.status === 'pending_acceptance') ||
+      (t.assignedById === currentMemberId && t.status === 'in_review')
+  ).length;
 
   const maxStreak = activeHabits.reduce((max, h) => {
     const stats = getHabitStats(h);
@@ -189,6 +198,7 @@ export const Header: React.FC = () => {
     { id: ActiveTabType; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }
   > = {
     today: { id: 'today', label: 'Today', icon: Calendar },
+    team: { id: 'team', label: 'Team', icon: Users, badge: pendingTeamActionsCount > 0 ? pendingTeamActionsCount : undefined },
     locked_in: { id: 'locked_in', label: 'Locked In', icon: Flame },
     weekly: { id: 'weekly', label: 'Weekly Grid', icon: Grid },
     heatmap: { id: 'heatmap', label: 'Heatmap', icon: Sparkles },

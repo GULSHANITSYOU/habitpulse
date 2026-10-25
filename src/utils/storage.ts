@@ -1,4 +1,13 @@
-import type { Habit, HabitLog, UserProfile, TodoItem, IdeaItem, FocusSession } from '../types/habit';
+import type {
+  Habit,
+  HabitLog,
+  UserProfile,
+  TodoItem,
+  IdeaItem,
+  FocusSession,
+  TeamMember,
+  TeamTask,
+} from '../types/habit';
 import { formatDateKey } from './dateUtils';
 
 export const STORAGE_KEYS = {
@@ -8,6 +17,9 @@ export const STORAGE_KEYS = {
   TODOS: 'habitpulse_todos_v1',
   IDEAS: 'habitpulse_ideas_v1',
   FOCUS_SESSIONS: 'habitpulse_focus_sessions_v1',
+  TEAM_MEMBERS: 'habitpulse_team_members_v1',
+  TEAM_TASKS: 'habitpulse_team_tasks_v1',
+  CURRENT_MEMBER_ID: 'habitpulse_current_member_id_v1',
   INITIALIZED: 'habitpulse_initialized_v1',
 };
 
@@ -427,6 +439,203 @@ export function saveFocusSessionsToStorage(sessions: FocusSession[]): void {
   } catch (err) {
     console.error('Failed to save focus sessions to storage', err);
   }
+}
+
+// ==========================================
+// Team Members & Team Tasks Storage Helpers
+// ==========================================
+
+export const defaultSeedTeamMembers: TeamMember[] = [
+  { id: 'tm-alex', name: 'Alex', role: 'Product Lead & Founder', avatarColor: '#000000', isCurrentUser: true },
+  { id: 'tm-rohan', name: 'Rohan', role: 'Frontend Engineer', avatarColor: '#3b82f6' },
+  { id: 'tm-sarah', name: 'Sarah', role: 'UI/UX Designer', avatarColor: '#ec4899' },
+  { id: 'tm-david', name: 'David', role: 'Backend & Systems', avatarColor: '#10b981' },
+  { id: 'tm-priya', name: 'Priya', role: 'QA & Growth', avatarColor: '#8b5cf6' },
+];
+
+export const defaultSeedTeamTasks: TeamTask[] = [
+  {
+    id: 'tt-1',
+    title: 'Review & Verify Razorpay Payment Webhook Security',
+    description: 'Ensure idempotency key check and signature verification are hardened against replay attacks before launching paid plans.',
+    category: 'Backend',
+    priority: 'urgent',
+    status: 'in_review',
+    progress: 100,
+    assignedById: 'tm-sarah',
+    assignedByName: 'Sarah',
+    assignedToId: 'tm-alex',
+    assignedToName: 'Alex',
+    dueDate: '2026-10-28',
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    acceptedAt: new Date(Date.now() - 86400000 * 1.8).toISOString(),
+    submittedForReviewAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updates: [
+      {
+        id: 'u-1',
+        authorId: 'tm-alex',
+        authorName: 'Alex',
+        message: 'Accepted task. Inspecting signature handler in worker runtime.',
+        progressPercent: 30,
+        timestamp: new Date(Date.now() - 86400000 * 1.5).toISOString(),
+      },
+      {
+        id: 'u-2',
+        authorId: 'tm-alex',
+        authorName: 'Alex',
+        message: 'Completed signature verification tests and added replay protection. Ready for review!',
+        progressPercent: 100,
+        timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+      },
+    ],
+  },
+  {
+    id: 'tt-2',
+    title: 'Design Gamified Onboarding & Profile Customization UI',
+    description: 'Create Figma components for new user onboarding, level badges, and sound theme toggles with high contrast dark mode.',
+    category: 'Design',
+    priority: 'high',
+    status: 'in_progress',
+    progress: 65,
+    assignedById: 'tm-alex',
+    assignedByName: 'Alex',
+    assignedToId: 'tm-sarah',
+    assignedToName: 'Sarah',
+    dueDate: '2026-10-29',
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    acceptedAt: new Date(Date.now() - 86400000 * 2.5).toISOString(),
+    updates: [
+      {
+        id: 'u-3',
+        authorId: 'tm-sarah',
+        authorName: 'Sarah',
+        message: 'Task accepted! Starting with mobile card specs.',
+        progressPercent: 20,
+        timestamp: new Date(Date.now() - 86400000 * 2.5).toISOString(),
+      },
+      {
+        id: 'u-4',
+        authorId: 'tm-sarah',
+        authorName: 'Sarah',
+        message: 'Drafted 3 layout variants for the Level & XP badge display. Reviewing typography.',
+        progressPercent: 65,
+        timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
+      },
+    ],
+  },
+  {
+    id: 'tt-3',
+    title: 'Implement Offline Caching & IndexDB fallback for Local-First Sync',
+    description: 'Ensure all mutations queue gracefully offline when internet drops and replay automatically on reconnect.',
+    category: 'Frontend',
+    priority: 'high',
+    status: 'pending_acceptance',
+    progress: 0,
+    assignedById: 'tm-alex',
+    assignedByName: 'Alex',
+    assignedToId: 'tm-rohan',
+    assignedToName: 'Rohan',
+    dueDate: '2026-10-30',
+    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+    updates: [],
+  },
+  {
+    id: 'tt-4',
+    title: 'PostgreSQL Database Indexing on user_cloud_sync table',
+    description: 'Add composite indexes on user_id and updated_at for sub-10ms query latency.',
+    category: 'Backend',
+    priority: 'medium',
+    status: 'completed',
+    progress: 100,
+    assignedById: 'tm-alex',
+    assignedByName: 'Alex',
+    assignedToId: 'tm-david',
+    assignedToName: 'David',
+    dueDate: '2026-10-24',
+    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+    acceptedAt: new Date(Date.now() - 86400000 * 3.8).toISOString(),
+    submittedForReviewAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    completedAt: new Date(Date.now() - 86400000 * 1.5).toISOString(),
+    updates: [
+      {
+        id: 'u-5',
+        authorId: 'tm-david',
+        authorName: 'David',
+        message: 'Applied btree index on user_id in Supabase schema. Verified explain analyze.',
+        progressPercent: 100,
+        timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
+      },
+      {
+        id: 'u-6',
+        authorId: 'tm-alex',
+        authorName: 'Alex',
+        message: 'Verified query execution plans. Great job, performance is instant!',
+        progressPercent: 100,
+        timestamp: new Date(Date.now() - 86400000 * 1.5).toISOString(),
+      },
+    ],
+  },
+];
+
+export function loadTeamMembersFromStorage(): TeamMember[] {
+  try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const data = localStorage.getItem(STORAGE_KEYS.TEAM_MEMBERS);
+    if (!data && !isInitialized) {
+      saveTeamMembersToStorage(defaultSeedTeamMembers);
+      return defaultSeedTeamMembers;
+    }
+    return data ? JSON.parse(data) : defaultSeedTeamMembers;
+  } catch (err) {
+    console.error('Failed to load team members from storage', err);
+    return defaultSeedTeamMembers;
+  }
+}
+
+export function saveTeamMembersToStorage(members: TeamMember[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.TEAM_MEMBERS, JSON.stringify(members));
+  } catch (err) {
+    console.error('Failed to save team members to storage', err);
+  }
+}
+
+export function loadTeamTasksFromStorage(): TeamTask[] {
+  try {
+    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const data = localStorage.getItem(STORAGE_KEYS.TEAM_TASKS);
+    if (!data && !isInitialized) {
+      saveTeamTasksToStorage(defaultSeedTeamTasks);
+      return defaultSeedTeamTasks;
+    }
+    return data ? JSON.parse(data) : defaultSeedTeamTasks;
+  } catch (err) {
+    console.error('Failed to load team tasks from storage', err);
+    return defaultSeedTeamTasks;
+  }
+}
+
+export function saveTeamTasksToStorage(tasks: TeamTask[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.TEAM_TASKS, JSON.stringify(tasks));
+  } catch (err) {
+    console.error('Failed to save team tasks to storage', err);
+  }
+}
+
+export function loadCurrentMemberIdFromStorage(): string {
+  try {
+    const id = localStorage.getItem(STORAGE_KEYS.CURRENT_MEMBER_ID);
+    return id || 'tm-alex';
+  } catch {
+    return 'tm-alex';
+  }
+}
+
+export function saveCurrentMemberIdToStorage(id: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_MEMBER_ID, id);
+  } catch {}
 }
 
 // Preset habit packs for one-click add

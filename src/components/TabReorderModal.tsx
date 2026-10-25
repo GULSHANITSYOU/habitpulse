@@ -16,6 +16,7 @@ import {
   Lightbulb,
   Eye,
   EyeOff,
+  Users,
 } from 'lucide-react';
 import type { ActiveTabType } from '../context/HabitContext';
 
@@ -36,6 +37,7 @@ const TAB_METADATA: Record<
   { label: string; icon: React.ComponentType<{ className?: string }> }
 > = {
   today: { label: 'Today', icon: Calendar },
+  team: { label: 'Team Tasks', icon: Users },
   locked_in: { label: 'Locked In', icon: Flame },
   weekly: { label: 'Weekly Grid', icon: Grid },
   heatmap: { label: 'Heatmap', icon: Sparkles },

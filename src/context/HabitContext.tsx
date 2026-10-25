@@ -1,6 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import type { Habit, HabitLog, UserProfile, HabitCategory, TimeOfDay, HabitStats, TodoItem, IdeaItem, FocusSession } from '../types/habit';
+import type {
+  Habit,
+  HabitLog,
+  UserProfile,
+  HabitCategory,
+  TimeOfDay,
+  HabitStats,
+  TodoItem,
+  IdeaItem,
+  FocusSession,
+  TeamMember,
+  TeamTask,
+  TaskUpdateLog,
+} from '../types/habit';
 import {
   loadHabitsFromStorage,
   saveHabitsToStorage,
@@ -14,6 +27,14 @@ import {
   saveIdeasToStorage,
   loadFocusSessionsFromStorage,
   saveFocusSessionsToStorage,
+  loadTeamMembersFromStorage,
+  saveTeamMembersToStorage,
+  loadTeamTasksFromStorage,
+  saveTeamTasksToStorage,
+  loadCurrentMemberIdFromStorage,
+  saveCurrentMemberIdToStorage,
+  defaultSeedTeamMembers,
+  defaultSeedTeamTasks,
   getInitialSeedData,
   resetSystemStorage,
 } from '../utils/storage';
@@ -27,7 +48,16 @@ import {
 import { soundFx } from '../utils/audio';
 import { useAuth } from './AuthContext';
 
-export type ActiveTabType = 'today' | 'weekly' | 'heatmap' | 'todos' | 'ideas' | 'locked_in' | 'analytics' | 'manage';
+export type ActiveTabType =
+  | 'today'
+  | 'team'
+  | 'weekly'
+  | 'heatmap'
+  | 'todos'
+  | 'ideas'
+  | 'locked_in'
+  | 'analytics'
+  | 'manage';
 
 interface HabitContextType {
   habits: Habit[];
@@ -84,6 +114,24 @@ interface HabitContextType {
   addFocusSession: (session: Omit<FocusSession, 'id'>) => void;
   deleteFocusSession: (id: string) => void;
   clearFocusSessions: () => void;
+
+  // Team Collaboration Actions
+  teamMembers: TeamMember[];
+  teamTasks: TeamTask[];
+  currentMemberId: string;
+  setCurrentMemberId: (id: string) => void;
+  addTeamMember: (member: Omit<TeamMember, 'id'>) => void;
+  updateTeamMember: (id: string, updates: Partial<TeamMember>) => void;
+  deleteTeamMember: (id: string) => void;
+  createTeamTask: (task: Omit<TeamTask, 'id' | 'createdAt' | 'status' | 'progress' | 'updates'>) => void;
+  acceptTeamTask: (taskId: string, message?: string) => void;
+  declineTeamTask: (taskId: string, reason: string) => void;
+  updateTaskProgress: (taskId: string, progress: number, updateMessage?: string) => void;
+  submitTaskForReview: (taskId: string, finalNotes?: string) => void;
+  approveTeamTask: (taskId: string, feedback?: string) => void;
+  reopenTeamTask: (taskId: string, feedback: string) => void;
+  deleteTeamTask: (taskId: string) => void;
+  updateTeamTask: (taskId: string, updates: Partial<TeamTask>) => void;
   
   // Settings & Storage
   resetToDefaults: () => void;
@@ -113,6 +161,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [todos, setTodos] = useState<TodoItem[]>(() => loadTodosFromStorage());
   const [ideas, setIdeas] = useState<IdeaItem[]>(() => loadIdeasFromStorage());
   const [focusSessions, setFocusSessions] = useState<FocusSession[]>(() => loadFocusSessionsFromStorage());
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() => loadTeamMembersFromStorage());
+  const [teamTasks, setTeamTasks] = useState<TeamTask[]>(() => loadTeamTasksFromStorage());
+  const [currentMemberId, setCurrentMemberId] = useState<string>(() => loadCurrentMemberIdFromStorage());
   const [user, setUser] = useState<UserProfile>(() => loadUserFromStorage());
 
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
@@ -143,6 +194,8 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (Array.isArray(cloudData.todos)) setTodos(cloudData.todos);
           if (Array.isArray(cloudData.ideas)) setIdeas(cloudData.ideas);
           if (Array.isArray(cloudData.focus_sessions)) setFocusSessions(cloudData.focus_sessions);
+          if (Array.isArray(cloudData.team_tasks)) setTeamTasks(cloudData.team_tasks);
+          if (Array.isArray(cloudData.team_members)) setTeamMembers(cloudData.team_members);
           if (cloudData.user) setUser((prev) => ({ ...prev, ...cloudData.user }));
         }
         isCloudInitialLoaded.current = true;
@@ -180,6 +233,21 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     saveFocusSessionsToStorage(focusSessions);
   }, [focusSessions]);
 
+  // Persist team members on change
+  useEffect(() => {
+    saveTeamMembersToStorage(teamMembers);
+  }, [teamMembers]);
+
+  // Persist team tasks on change
+  useEffect(() => {
+    saveTeamTasksToStorage(teamTasks);
+  }, [teamTasks]);
+
+  // Persist current member id
+  useEffect(() => {
+    saveCurrentMemberIdToStorage(currentMemberId);
+  }, [currentMemberId]);
+
   // Persist user and apply dark/light class
   useEffect(() => {
     saveUserToStorage(user);
@@ -201,10 +269,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         todos,
         ideas,
         focus_sessions: focusSessions,
+        team_tasks: teamTasks,
+        team_members: teamMembers,
         user,
       });
     }
-  }, [habits, logs, todos, ideas, focusSessions, user, isPremium, currentUser, syncCurrentDataToCloud]);
+  }, [habits, logs, todos, ideas, focusSessions, teamTasks, teamMembers, user, isPremium, currentUser, syncCurrentDataToCloud]);
 
   // Confetti helper
   const triggerConfetti = useCallback(() => {
@@ -651,6 +721,216 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     soundFx.playTap(user.soundEnabled);
   }, [user.soundEnabled]);
 
+  // Team Collaboration Actions
+  const addTeamMember = useCallback((data: Omit<TeamMember, 'id'>) => {
+    const newMember: TeamMember = {
+      ...data,
+      id: `tm-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    };
+    setTeamMembers((prev) => [...prev, newMember]);
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const updateTeamMember = useCallback((id: string, updates: Partial<TeamMember>) => {
+    setTeamMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, ...updates } : m))
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const deleteTeamMember = useCallback((id: string) => {
+    setTeamMembers((prev) => prev.filter((m) => m.id !== id));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const createTeamTask = useCallback((data: Omit<TeamTask, 'id' | 'createdAt' | 'status' | 'progress' | 'updates'>) => {
+    const newTask: TeamTask = {
+      ...data,
+      id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      status: 'pending_acceptance',
+      progress: 0,
+      createdAt: new Date().toISOString(),
+      updates: [
+        {
+          id: `up-${Date.now()}`,
+          authorId: data.assignedById,
+          authorName: data.assignedByName,
+          message: `Task assigned to ${data.assignedToName}. Waiting for acceptance.`,
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+    setTeamTasks((prev) => [newTask, ...prev]);
+    soundFx.playTap(user.soundEnabled);
+    addXp(15);
+  }, [user.soundEnabled, addXp]);
+
+  const acceptTeamTask = useCallback((taskId: string, message?: string) => {
+    const now = new Date().toISOString();
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdate: TaskUpdateLog = {
+          id: `up-${Date.now()}`,
+          authorId: t.assignedToId,
+          authorName: t.assignedToName,
+          message: message?.trim() || `${t.assignedToName} accepted this task and started working.`,
+          progressPercent: t.progress,
+          timestamp: now,
+        };
+        return {
+          ...t,
+          status: 'in_progress',
+          acceptedAt: now,
+          updates: [...t.updates, newUpdate],
+        };
+      })
+    );
+    soundFx.playTap(user.soundEnabled);
+    addXp(20);
+  }, [user.soundEnabled, addXp]);
+
+  const declineTeamTask = useCallback((taskId: string, reason: string) => {
+    const now = new Date().toISOString();
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdate: TaskUpdateLog = {
+          id: `up-${Date.now()}`,
+          authorId: t.assignedToId,
+          authorName: t.assignedToName,
+          message: `Task declined. Reason: ${reason}`,
+          timestamp: now,
+        };
+        return {
+          ...t,
+          updates: [...t.updates, newUpdate],
+        };
+      })
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const updateTaskProgress = useCallback((taskId: string, progress: number, updateMessage?: string) => {
+    const now = new Date().toISOString();
+    const clampedProgress = Math.max(0, Math.min(100, Math.round(progress)));
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdates = [...t.updates];
+        if (updateMessage?.trim()) {
+          newUpdates.push({
+            id: `up-${Date.now()}`,
+            authorId: t.assignedToId,
+            authorName: t.assignedToName,
+            message: updateMessage.trim(),
+            progressPercent: clampedProgress,
+            timestamp: now,
+          });
+        }
+        return {
+          ...t,
+          progress: clampedProgress,
+          updates: newUpdates,
+        };
+      })
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const submitTaskForReview = useCallback((taskId: string, finalNotes?: string) => {
+    const now = new Date().toISOString();
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdate: TaskUpdateLog = {
+          id: `up-${Date.now()}`,
+          authorId: t.assignedToId,
+          authorName: t.assignedToName,
+          message: finalNotes?.trim()
+            ? `Work finished (100%) and submitted for review: "${finalNotes.trim()}"`
+            : `Work finished (100%) and submitted for review to ${t.assignedByName}.`,
+          progressPercent: 100,
+          timestamp: now,
+        };
+        return {
+          ...t,
+          status: 'in_review',
+          progress: 100,
+          submittedForReviewAt: now,
+          updates: [...t.updates, newUpdate],
+        };
+      })
+    );
+    soundFx.playCompletion(user.soundEnabled);
+    triggerConfetti();
+    addXp(35);
+  }, [user.soundEnabled, triggerConfetti, addXp]);
+
+  const approveTeamTask = useCallback((taskId: string, feedback?: string) => {
+    const now = new Date().toISOString();
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdate: TaskUpdateLog = {
+          id: `up-${Date.now()}`,
+          authorId: t.assignedById,
+          authorName: t.assignedByName,
+          message: feedback?.trim()
+            ? `Verified & Approved by ${t.assignedByName}: "${feedback.trim()}"`
+            : `Verified & Approved by ${t.assignedByName}. Task marked Complete!`,
+          progressPercent: 100,
+          timestamp: now,
+        };
+        return {
+          ...t,
+          status: 'completed',
+          progress: 100,
+          completedAt: now,
+          updates: [...t.updates, newUpdate],
+        };
+      })
+    );
+    soundFx.playLevelUp(user.soundEnabled);
+    triggerConfetti();
+    addXp(50);
+  }, [user.soundEnabled, triggerConfetti, addXp]);
+
+  const reopenTeamTask = useCallback((taskId: string, feedback: string) => {
+    const now = new Date().toISOString();
+    setTeamTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const newUpdate: TaskUpdateLog = {
+          id: `up-${Date.now()}`,
+          authorId: t.assignedById,
+          authorName: t.assignedByName,
+          message: `Reopened for revisions: "${feedback.trim()}"`,
+          timestamp: now,
+        };
+        return {
+          ...t,
+          status: 'in_progress',
+          progress: Math.min(85, t.progress),
+          updates: [...t.updates, newUpdate],
+        };
+      })
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const deleteTeamTask = useCallback((taskId: string) => {
+    setTeamTasks((prev) => prev.filter((t) => t.id !== taskId));
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
+  const updateTeamTask = useCallback((taskId: string, updates: Partial<TeamTask>) => {
+    setTeamTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
+    );
+    soundFx.playTap(user.soundEnabled);
+  }, [user.soundEnabled]);
+
   // Reset all data to rich seed demo
   const resetToDefaults = useCallback(() => {
     const initial = getInitialSeedData();
@@ -660,6 +940,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTodos(loadTodosFromStorage());
     setIdeas(loadIdeasFromStorage());
     setFocusSessions(loadFocusSessionsFromStorage());
+    setTeamMembers(defaultSeedTeamMembers);
+    setTeamTasks(defaultSeedTeamTasks);
+    setCurrentMemberId('tm-alex');
     soundFx.playTap(true);
   }, []);
 
@@ -672,6 +955,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTodos([]);
     setIdeas([]);
     setFocusSessions([]);
+    setTeamTasks([]);
     setSelectedDate(getTodayKey());
     setActiveTab('today');
     soundFx.playTap(true);
@@ -687,10 +971,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       todos,
       ideas,
       focusSessions,
+      teamMembers,
+      teamTasks,
       user,
     };
     return JSON.stringify(data, null, 2);
-  }, [habits, logs, todos, ideas, focusSessions, user]);
+  }, [habits, logs, todos, ideas, focusSessions, teamMembers, teamTasks, user]);
 
   // Import JSON
   const importData = useCallback((jsonStr: string): boolean => {
@@ -710,6 +996,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (Array.isArray(parsed.focusSessions)) {
         setFocusSessions(parsed.focusSessions);
+      }
+      if (Array.isArray(parsed.teamMembers)) {
+        setTeamMembers(parsed.teamMembers);
+      }
+      if (Array.isArray(parsed.teamTasks)) {
+        setTeamTasks(parsed.teamTasks);
       }
       if (parsed.user) {
         setUser(parsed.user);
@@ -775,6 +1067,22 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         todos,
         ideas,
         focusSessions,
+        teamMembers,
+        teamTasks,
+        currentMemberId,
+        setCurrentMemberId,
+        addTeamMember,
+        updateTeamMember,
+        deleteTeamMember,
+        createTeamTask,
+        acceptTeamTask,
+        declineTeamTask,
+        updateTaskProgress,
+        submitTaskForReview,
+        approveTeamTask,
+        reopenTeamTask,
+        deleteTeamTask,
+        updateTeamTask,
         user,
         selectedDate,
         setSelectedDate,

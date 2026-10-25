@@ -16,6 +16,8 @@ create table if not exists public.user_cloud_sync (
   todos jsonb not null default '[]'::jsonb,
   ideas jsonb not null default '[]'::jsonb,
   focus_sessions jsonb not null default '[]'::jsonb,
+  team_tasks jsonb not null default '[]'::jsonb,
+  team_members jsonb not null default '[]'::jsonb,
   user_profile jsonb not null default '{}'::jsonb,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
@@ -23,6 +25,8 @@ create table if not exists public.user_cloud_sync (
 -- Ensure column exists if table was already created
 alter table public.user_cloud_sync add column if not exists ideas jsonb not null default '[]'::jsonb;
 alter table public.user_cloud_sync add column if not exists focus_sessions jsonb not null default '[]'::jsonb;
+alter table public.user_cloud_sync add column if not exists team_tasks jsonb not null default '[]'::jsonb;
+alter table public.user_cloud_sync add column if not exists team_members jsonb not null default '[]'::jsonb;
 
 -- 2. Create User Profiles Table (Stores tier, status and subscription)
 create table if not exists public.profiles (

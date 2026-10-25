@@ -19,6 +19,7 @@ const ManageHabitsView = lazy(() => import('./components/ManageHabitsView').then
 const TodosView = lazy(() => import('./components/TodosView').then(m => ({ default: m.TodosView })));
 const IdeasView = lazy(() => import('./components/IdeasView').then(m => ({ default: m.IdeasView })));
 const LockedInView = lazy(() => import('./components/LockedInView').then(m => ({ default: m.LockedInView })));
+const TeamView = lazy(() => import('./components/TeamView').then(m => ({ default: m.TeamView })));
 
 const TabLoadingFallback: React.FC = () => (
   <div className="p-12 text-center flex flex-col items-center justify-center space-y-3 min-h-[300px]">
@@ -182,6 +183,12 @@ const MainContent: React.FC = () => {
           {activeTab === 'locked_in' && (
             <div className="animate-in fade-in duration-300">
               <LockedInView />
+            </div>
+          )}
+
+          {activeTab === 'team' && (
+            <div className="animate-in fade-in duration-300">
+              <TeamView />
             </div>
           )}
 

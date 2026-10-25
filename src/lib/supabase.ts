@@ -1,5 +1,14 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Habit, HabitLog, TodoItem, UserProfile, IdeaItem, FocusSession } from '../types/habit';
+import type {
+  Habit,
+  HabitLog,
+  TodoItem,
+  UserProfile,
+  IdeaItem,
+  FocusSession,
+  TeamMember,
+  TeamTask,
+} from '../types/habit';
 import type { SubscriptionPlan } from '../types/auth';
 
 const DEFAULT_SUPABASE_URL = 'https://qumpqsbmvgcvfwzpgtvz.supabase.co';
@@ -57,6 +66,8 @@ export interface CloudPayload {
   todos: TodoItem[];
   ideas?: IdeaItem[];
   focus_sessions?: FocusSession[];
+  team_tasks?: TeamTask[];
+  team_members?: TeamMember[];
   user: UserProfile;
   updatedAt: string;
 }
@@ -81,6 +92,8 @@ export async function uploadToSupabaseCloud(
       todos: payload.todos,
       ideas: payload.ideas || [],
       focus_sessions: payload.focus_sessions || [],
+      team_tasks: payload.team_tasks || [],
+      team_members: payload.team_members || [],
       user_profile: payload.user,
       updated_at: new Date().toISOString(),
     };
@@ -133,6 +146,8 @@ export async function downloadFromSupabaseCloud(
       todos: Array.isArray(data.todos) ? data.todos : [],
       ideas: Array.isArray(data.ideas) ? data.ideas : [],
       focus_sessions: Array.isArray(data.focus_sessions) ? data.focus_sessions : [],
+      team_tasks: Array.isArray(data.team_tasks) ? data.team_tasks : [],
+      team_members: Array.isArray(data.team_members) ? data.team_members : [],
       user: data.user_profile || {},
       updatedAt: data.updated_at || new Date().toISOString(),
     };
